@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Tra Cứu Danh Mục Cơ Quan - Visnam</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SheetJS (XLSX) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617; /* Slate 950 - Nền tối sâu */
+            color: #94a3b8; /* Slate 400 */
+        }
+
+        /* Khối giao diện Dark Premium - Gọn gàng, không màu mè */
+        .premium-panel {
+            background-color: #0f172a; /* Slate 900 */
+            border: 1px solid #1e293b; /* Slate 800 */
+            border-radius: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            background-color: #0f172a;
+            border-bottom: 1px solid #1e293b;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #f8fafc;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Tùy chỉnh thanh cuộn Dark cho bảng */
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Tiêu đề bảng cố định */
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #1e293b !important; /* Slate 800 */
+            color: #38bdf8 !important; /* Sky 400 */
+            border-bottom: 1px solid #334155; 
+        }
+        
+        /* Dòng dữ liệu phẳng, không hiệu ứng hover màu mè */
+        tbody tr { border-bottom: 1px solid #1e293b; transition: none; }
+        tbody tr:hover { background-color: transparent !important; } /* Tắt hover */
+
+        /* Thẻ Input/Select Dark */
+        .dark-input {
+            background-color: #020617; /* Slate 950 */
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            transition: border-color 0.2s;
+        }
+        .dark-input:focus {
+            border-color: #0ea5e9; /* Sky 500 */
+            outline: none;
+        }
+
+        /* Loading Animation */
+        .tech-radar {
+            border: 2px dashed rgba(14, 165, 233, 0.3);
+            border-top: 2px solid #0ea5e9;
+            border-bottom: 2px solid #10b981;
+            animation: spin 3s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Chống vỡ Layout trên Mobile */
+        @media (max-width: 1024px) {
+            body { height: auto !important; min-height: 100vh; overflow: auto !important; }
+            .main-layout { flex-direction: column; overflow: visible !important; }
+            .sidebar-col { width: 100% !important; height: auto !important; }
+            .content-col { width: 100% !important; min-height: 600px; }
+        }
+    </style>
+</head>
+<body class="text-[12px] flex flex-col h-screen overflow-hidden">
+
+    <!-- Loading Screen (0-100%) -->
+    <div id="loading-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-300">
+        
+        <!-- Logo Area -->
+        <div class="relative w-28 h-28 mb-8 flex justify-center items-center rounded-full">
+            <div class="absolute inset-0 rounded-full tech-radar"></div>
+            <!-- Custom SVG Logo -->
+            <svg viewBox="0 0 100 100" class="w-12 h-12 relative z-10 drop-shadow-[0_0_10px_rgba(14,165,233,0.8)]">
+                <path d="M50 5 A 45 45 0 1 0 95 50 A 45 45 0 0 0 50 5" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="10 6"/>
+                <circle cx="45" cy="45" r="30" fill="rgba(2,6,23,0.8)" stroke="#0ea5e9" stroke-width="4"/>
+                <line x1="66" y1="66" x2="88" y2="88" stroke="#0ea5e9" stroke-width="8" stroke-linecap="round"/>
+                <path d="M45 25 L58 30 L58 42 C58 52 45 60 45 60 C45 60 32 52 32 42 L32 30 Z" fill="#0ea5e9" stroke="#ffffff" stroke-width="1.5"/>
+            </svg>
+        </div>
+
+        <h2 class="text-lg font-bold text-white mb-4 tracking-[0.2em]">HỆ THỐNG DỮ LIỆU BHXH</h2>
+        
+        <!-- Progress Bar -->
+        <div class="w-64 flex flex-col items-center">
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="loading-bar-fill" class="h-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.8)] transition-all duration-75 ease-linear" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between w-full mt-2">
+                <span class="text-slate-500 text-[10px] uppercase tracking-wider">Đang khởi tạo</span>
+                <span id="loading-percentage" class="text-sky-400 text-xs font-bold font-mono">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Dark Premium -->
+    <header class="bg-[#0f172a] border-b border-slate-800 h-16 flex-shrink-0 relative z-40">
+        <div class="w-full h-full px-4 flex justify-between items-center">
+            
+            <!-- Trái: Logo + Tiêu đề -->
+            <div class="flex items-center gap-3">
+                <div class="p-1.5 bg-slate-800 rounded flex items-center justify-center border border-slate-700 shadow-inner">
+                    <img src="photo-img-638326152567188994.png" alt="Visnam" class="h-7 object-contain" onerror="this.style.display='none'">
+                </div>
+                <div class="h-6 w-px bg-slate-700 hidden sm:block"></div>
+                <div class="flex flex-col justify-center">
+                    <h1 class="font-bold text-[14px] text-slate-100 uppercase tracking-wide leading-none">TRA CỨU CƠ QUAN BHXH</h1>
+                    <p class="text-[9px] text-sky-500 font-semibold uppercase tracking-widest mt-1 leading-none">Công ty CP Thương Mại Visnam</p>
+                </div>
+            </div>
+            
+            <!-- Phải: Admin + Logo Custom -->
+            <div class="flex items-center gap-3">
+                <!-- Admin Button -->
+                <button id="btn-login-trigger" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-sky-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-slate-700">
+                    <i class="fas fa-shield-alt"></i> <span class="hidden sm:inline">Admin</span>
+                </button>
+                <button id="btn-logout" class="hidden flex items-center gap-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-red-900/50">
+                    <i class="fas fa-sign-out-alt"></i> <span class="hidden sm:inline">Thoát</span>
+                </button>
+
+                <!-- Custom Logo (Tìm kiếm + BHXH + Kỹ thuật) -->
+                <div class="flex items-center gap-2 bg-slate-950 p-1 pl-2 pr-3 rounded-full border border-slate-800 shadow-inner">
+                    <svg viewBox="0 0 100 100" class="w-7 h-7 drop-shadow-[0_0_3px_rgba(14,165,233,0.5)]">
+                        <path d="M50 5 A 45 45 0 1 0 95 50 A 45 45 0 0 0 50 5" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="10 8"/>
+                        <circle cx="45" cy="45" r="32" fill="rgba(2,6,23,0.8)" stroke="#0ea5e9" stroke-width="4"/>
+                        <line x1="68" y1="68" x2="88" y2="88" stroke="#0ea5e9" stroke-width="8" stroke-linecap="round"/>
+                        <path d="M45 22 L60 28 L60 42 C60 55 45 65 45 65 C45 65 30 55 30 42 L30 28 Z" fill="#0ea5e9" stroke="#ffffff" stroke-width="1.5"/>
+                    </svg>
+                    <div class="flex flex-col hidden sm:flex">
+                        <span class="text-[10px] font-bold text-slate-200 leading-none">SYSTEM</span>
+                        <span class="text-[8px] text-sky-500 font-semibold uppercase leading-none tracking-widest mt-0.5">DB Search</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout: Bố cục cố định tuyệt đối -->
+    <main class="main-layout flex-1 flex flex-row w-full p-3 gap-3 overflow-hidden relative z-10">
+        
+        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Cổng Trực Tuyến -> Liên Hệ) -->
+        <aside class="sidebar-col w-[260px] xl:w-[280px] flex flex-col gap-3 flex-shrink-0 h-full overflow-y-auto custom-scroll pr-1 pb-1">
+            
+            <!-- Bộ Lọc Tìm Kiếm (Được đưa lên đầu để lấp đầy khoảng trống) -->
+            <div class="premium-panel flex-shrink-0">
+                <div class="panel-header">
+                    <i class="fas fa-filter text-sky-500"></i> LỌC DỮ LIỆU
+                </div>
+                <div class="p-3 space-y-3">
+                    <div class="relative">
+                        <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                        <select id="select-tinh" class="dark-input w-full pl-8 pr-3 py-2 rounded-lg text-xs font-medium appearance-none cursor-pointer">
+                            <option value="">Tỉnh/Thành phố...</option>
+                        </select>
+                    </div>
+                    <div class="relative">
+                        <i class="fas fa-building absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                        <select id="select-coquan" class="dark-input w-full pl-8 pr-3 py-2 rounded-lg text-xs font-medium appearance-none cursor-pointer">
+                            <option value="">Cơ quan BHXH...</option>
+                        </select>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="input-search" placeholder="Tên/mã xã tìm kiếm..." class="dark-input w-full pl-8 pr-3 py-2 rounded-lg text-xs font-medium" />
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cổng Trực Tuyến -->
+            <div class="premium-panel flex-shrink-0">
+                <div class="panel-header">
+                    <i class="fas fa-globe text-sky-500"></i> Cổng Trực Tuyến
+                </div>
+                <div class="p-2.5 grid grid-cols-2 gap-2">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-sky-500/50 transition-colors">
+                        <i class="fas fa-qrcode text-sky-400 text-base"></i>
+                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Mã số<br>BHXH</span>
+                    </a>
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-500/50 transition-colors">
+                        <i class="fas fa-id-card text-emerald-400 text-base"></i>
+                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Thẻ<br>BHYT</span>
+                    </a>
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-purple-500/50 transition-colors">
+                        <i class="fas fa-building text-purple-400 text-base"></i>
+                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Đơn vị<br>tham gia</span>
+                    </a>
+                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-orange-500/50 transition-colors">
+                        <i class="fas fa-laptop-house text-orange-400 text-base"></i>
+                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Dịch vụ<br>công</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Liên Hệ Hỗ Trợ (Thiết kế Gọn gàng - 2 dòng icons) -->
+            <div class="premium-panel flex-1 flex flex-col justify-end">
+                <div class="panel-header flex-shrink-0">
+                    <i class="fas fa-headset text-sky-500"></i> Liên Hệ Hỗ Trợ
+                </div>
+                <div class="p-3 flex-1 flex flex-col justify-center bg-[#020617]/50">
+                    
+                    <!-- Dòng 1: Hotline, Website, Zalo (3 items) -->
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <a href="tel:19006134" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-rose-500/50 transition-colors group">
+                            <i class="fas fa-phone-alt text-rose-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">1900.6134</span>
+                        </a>
+                        <a href="https://visnam.com/" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-sky-500/50 transition-colors group">
+                            <i class="fas fa-globe text-sky-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Website</span>
+                        </a>
+                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-blue-500/50 transition-colors group">
+                            <i class="fas fa-comment-dots text-blue-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Zalo OA</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Dòng 2: Fanpage, Map (2 items) -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://www.facebook.com/visnamcorp" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-colors group">
+                            <i class="fab fa-facebook-f text-indigo-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Fanpage</span>
+                        </a>
+                        <div class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900 border border-slate-800 cursor-default">
+                            <i class="fas fa-map-marker-alt text-slate-500 text-base mb-1.5"></i>
+                            <span class="text-[9px] text-slate-400 text-center leading-tight">33 Hải Hồ<br>Đà Nẵng</span>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="pt-2 pb-2 text-center bg-[#020617] border-t border-slate-800">
+                    <p class="text-[9px] text-slate-600 font-semibold tracking-widest">&copy; <span id="year"></span> VISNAM JSC. ALL RIGHTS RESERVED.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CỘT PHẢI: BẢNG DỮ LIỆU TỐI ĐA -->
+        <section class="content-col flex-1 min-w-0 min-h-0 flex flex-col premium-panel">
+            <div class="panel-header justify-between flex-shrink-0 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-table text-sky-500"></i> BẢNG TRÍCH XUẤT DỮ LIỆU
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <div id="upload-message" class="hidden text-sky-400 text-[10px] font-bold"></div>
+                    
+                    <!-- Nút Upload ẩn đi, chỉ hiện khi Admin Login -->
+                    <div id="upload-section" class="hidden">
+                        <input type="file" id="excelUpload" accept=".xlsx, .xls" class="hidden" />
+                        <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-md text-[10px] font-bold transition-colors flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                            <i class="fas fa-cloud-upload-alt"></i> TẢI LÊN EXCEL
+                        </label>
+                    </div>
+
+                    <span id="record-count" class="bg-slate-800 text-sky-400 text-[10px] font-bold px-2.5 py-1 rounded border border-slate-700 shadow-inner">
+                        0 dòng
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Vùng Thanh Cuộn Bảng - Trải dài tối đa -->
+            <div class="custom-scroll flex-1 overflow-auto bg-[#0b1120]">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest w-10 text-center">STT</th>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest">Mã Tỉnh</th>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest text-slate-300">Tên Tỉnh</th>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest">Mã CQ</th>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest text-slate-300">Tên Cơ Quan</th>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest">Mã Xã</th>
+                            <th class="px-4 py-3 font-bold text-[10px] uppercase tracking-widest text-slate-300">Tên Phường/Xã</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- JS Render Here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Admin Login Dark -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity">
+        <div class="premium-panel w-full max-w-[300px] border-sky-500/30 shadow-[0_0_30px_rgba(56,189,248,0.2)]">
+            <div class="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+                <h3 class="text-xs font-bold text-white flex items-center gap-2"><i class="fas fa-shield-alt text-sky-500"></i> ĐĂNG NHẬP QUẢN TRỊ</h3>
+                <button id="btn-close-login" class="text-slate-500 hover:text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="login-form" class="p-4 space-y-3 bg-[#020617]">
+                <div id="login-error" class="hidden text-red-500 text-[10px] font-bold text-center">
+                    Sai thông tin đăng nhập!
+                </div>
+                
+                <div class="relative">
+                    <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                    <input type="text" id="username" placeholder="Tài khoản admin" required class="dark-input w-full pl-8 pr-3 py-2 text-xs rounded-md font-medium" />
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                    <input type="password" id="password" placeholder="Mật khẩu visnam" required class="dark-input w-full pl-8 pr-3 py-2 text-xs rounded-md font-medium" />
+                </div>
+
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 rounded-md text-xs transition-colors mt-2">
+                    ĐĂNG NHẬP
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase và Logic Ứng dụng -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Cấu hình Database Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyC-QUv2MgckcmqMbSTfksI0TUQCiTYW_PE",
+          authDomain: "tra-cuu-co-quan-bhxh.firebaseapp.com",
+          projectId: "tra-cuu-co-quan-bhxh",
+          storageBucket: "tra-cuu-co-quan-bhxh.firebasestorage.app",
+          messagingSenderId: "810791838843",
+          appId: "1:810791838843:web:401b9788d01255cc8beede",
+          measurementId: "G-T1JDKMSK26"
+        };
+        
+        let app, auth, db, userSession;
+        let isFirebaseActive = false;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isFirebaseActive = true;
+        } catch(e) {
+            console.error("Firebase init failed");
+        }
+
+        let currentData = [];
+        let filteredData = [];
+        let isAdmin = false;
+
+        // Xử lý bản quyền năm
+        document.getElementById('year').innerText = new Date().getFullYear();
+
+        // Xử lý Loading Animation
+        let progress = 0;
+        let loadingFinished = false;
+        const progressEl = document.getElementById('loading-percentage');
+        const barEl = document.getElementById('loading-bar-fill');
+        const screenEl = document.getElementById('loading-screen');
+
+        const loadingInterval = setInterval(() => {
+            if (loadingFinished) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                finishLoading();
+            } else {
+                progress += Math.floor(Math.random() * 4) + 1; 
+                if(progress >= 95) progress = 95; 
+                progressEl.innerText = progress + '%';
+                barEl.style.width = progress + '%';
+            }
+        }, 60);
+
+        function finishLoading() {
+            progressEl.innerText = '100%';
+            barEl.style.width = '100%';
+            setTimeout(() => {
+                screenEl.style.opacity = '0';
+                setTimeout(() => { screenEl.style.display = 'none'; }, 300);
+            }, 200);
+        }
+
+        async function initFirebaseAuthAndData() {
+            if(!isFirebaseActive) {
+                loadingFinished = true;
+                return;
+            }
+            try {
+                await signInAnonymously(auth);
+                userSession = auth.currentUser;
+                if(!userSession) {
+                    loadingFinished = true;
+                    return;
+                }
+
+                const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
+                onSnapshot(dataCollectionRef, (snapshot) => {
+                    let allLoadedData = [];
+                    snapshot.forEach(doc => {
+                        if(doc.id.startsWith('chunk_')) {
+                            try {
+                                const chunkArray = JSON.parse(doc.data().payload);
+                                allLoadedData = allLoadedData.concat(chunkArray);
+                            } catch(e) {}
+                        }
+                    });
+
+                    if(allLoadedData.length > 0) {
+                        currentData = allLoadedData;
+                        refreshUI();
+                    }
+                    loadingFinished = true;
+                }, (error) => { loadingFinished = true; });
+            } catch (error) { loadingFinished = true; }
+        }
+        
+        initFirebaseAuthAndData();
+
+        // Xử lý Upload Excel
+        document.getElementById('excelUpload').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const label = document.getElementById('upload-label');
+            const originalLabelText = label.innerHTML;
+            label.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Xử lý...';
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    const parsedData = [];
+                    for (let i = 1; i < json.length; i++) {
+                        const row = json[i];
+                        if (!row || row.length === 0) continue;
+                        const maTinh = row[1]?.toString().trim() || '';
+                        const tenCoQuan = row[4]?.toString().trim() || '';
+                        
+                        if (maTinh && tenCoQuan) {
+                            parsedData.push({
+                                stt: row[0]?.toString().trim() || '',
+                                maTinh: maTinh,
+                                tenTinh: row[2]?.toString().trim() || '',
+                                maCoQuan: row[3]?.toString().trim() || '',
+                                tenCoQuan: tenCoQuan,
+                                maXa: row[5]?.toString().trim() || '',
+                                tenXa: row[6]?.toString().trim() || ''
+                            });
+                        }
+                    }
+
+                    if (parsedData.length > 0) {
+                        currentData = parsedData;
+                        refreshUI();
+                        
+                        if(isFirebaseActive && userSession) {
+                            const chunkSize = 1500; 
+                            const totalChunks = Math.ceil(parsedData.length / chunkSize);
+                            for(let i=0; i < totalChunks; i++) {
+                                const chunk = parsedData.slice(i * chunkSize, (i+1) * chunkSize);
+                                const docRef = doc(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data', `chunk_${i}`);
+                                await setDoc(docRef, { payload: JSON.stringify(chunk) });
+                            }
+                            showUploadMessage(`Đã lưu ${parsedData.length} dòng.`);
+                        } else {
+                            showUploadMessage(`Đã tải ${parsedData.length} dòng.`);
+                        }
+                    } else {
+                        showUploadMessage('File lỗi', true);
+                    }
+                } catch (error) {
+                    showUploadMessage('Lỗi đọc file', true);
+                } finally {
+                    label.innerHTML = originalLabelText;
+                    e.target.value = ''; 
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function showUploadMessage(text, isError = false) {
+            const msgBox = document.getElementById('upload-message');
+            msgBox.innerHTML = text;
+            msgBox.classList.remove('hidden');
+            if(isError) {
+                msgBox.classList.add('text-red-400');
+                msgBox.classList.remove('text-sky-400');
+            } else {
+                msgBox.classList.add('text-sky-400');
+                msgBox.classList.remove('text-red-400');
+            }
+            setTimeout(() => { msgBox.classList.add('hidden'); }, 3000);
+        }
+
+        // Filters & Render
+        function refreshUI() {
+            document.getElementById('select-tinh').value = '';
+            document.getElementById('select-coquan').value = '';
+            document.getElementById('input-search').value = '';
+            populateTinhSelect();
+            populateCoQuanSelect();
+            applyFilters();
+        }
+
+        function populateTinhSelect() {
+            const select = document.getElementById('select-tinh');
+            const tinhSet = new Set(currentData.map(item => item.tenTinh));
+            select.innerHTML = '<option value="">Tỉnh/Thành phố...</option>';
+            Array.from(tinhSet).sort().forEach(tinh => {
+                select.innerHTML += `<option value="${tinh}">${tinh}</option>`;
+            });
+        }
+
+        function populateCoQuanSelect() {
+            const select = document.getElementById('select-coquan');
+            const tinhChon = document.getElementById('select-tinh').value;
+            let dataDeLoc = tinhChon ? currentData.filter(item => item.tenTinh === tinhChon) : currentData;
+            const coQuanSet = new Set(dataDeLoc.map(item => item.tenCoQuan));
+            select.innerHTML = '<option value="">Cơ quan BHXH...</option>';
+            Array.from(coQuanSet).sort().forEach(cq => {
+                select.innerHTML += `<option value="${cq}">${cq}</option>`;
+            });
+        }
+
+        function applyFilters() {
+            const tinh = document.getElementById('select-tinh').value;
+            const coquan = document.getElementById('select-coquan').value;
+            const search = document.getElementById('input-search').value.toLowerCase();
+
+            filteredData = currentData.filter(item => {
+                const matchTinh = !tinh || item.tenTinh === tinh;
+                const matchCoQuan = !coquan || item.tenCoQuan === coquan;
+                const matchXa = !search || 
+                                (item.tenXa && item.tenXa.toLowerCase().includes(search)) || 
+                                (item.maXa && item.maXa.includes(search));
+                return matchTinh && matchCoQuan && matchXa;
+            });
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            document.getElementById('record-count').innerText = `${filteredData.length.toLocaleString('vi-VN')} dòng`;
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-4 py-16 text-center text-slate-500">
+                            <i class="fas fa-database text-3xl mb-2 text-slate-700"></i>
+                            <p class="font-bold text-[12px] text-slate-500 tracking-wider">TRỐNG DỮ LIỆU</p>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            const displayData = filteredData.slice(0, 500); 
+            let html = '';
+            displayData.forEach((row, idx) => {
+                html += `
+                    <tr>
+                        <td class="px-4 py-2.5 text-[11px] text-slate-500 text-center">${row.stt || (idx + 1)}</td>
+                        <td class="px-4 py-2.5 text-[11px] font-bold text-sky-400">${row.maTinh}</td>
+                        <td class="px-4 py-2.5 text-[12px] text-slate-300">${row.tenTinh}</td>
+                        <td class="px-4 py-2.5 text-[11px] font-bold text-teal-400">${row.maCoQuan}</td>
+                        <td class="px-4 py-2.5 text-[12px] font-medium text-slate-300">${row.tenCoQuan}</td>
+                        <td class="px-4 py-2.5 text-[11px] text-slate-500">${row.maXa}</td>
+                        <td class="px-4 py-2.5 text-[12px] text-slate-300">${row.tenXa}</td>
+                    </tr>`;
+            });
+            if(filteredData.length > 500){
+                html += `<tr><td colspan="7" class="text-center py-2 text-[10px] text-sky-500 bg-[#0f172a] font-medium">Hiển thị 500 dòng đầu. Dùng bộ lọc để thu hẹp tìm kiếm.</td></tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+
+        document.getElementById('select-tinh').addEventListener('change', () => {
+            document.getElementById('select-coquan').value = "";
+            populateCoQuanSelect();
+            applyFilters();
+        });
+        document.getElementById('select-coquan').addEventListener('change', applyFilters);
+        document.getElementById('input-search').addEventListener('input', applyFilters);
+
+        // Đăng nhập Admin
+        const loginModal = document.getElementById('login-modal');
+        document.getElementById('btn-login-trigger').addEventListener('click', () => { loginModal.classList.remove('hidden'); });
+        
+        function closeLogin() {
+            loginModal.classList.add('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('login-form').reset();
+        }
+        document.getElementById('btn-close-login').addEventListener('click', closeLogin);
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'visnam') {
+                isAdmin = true;
+                closeLogin();
+                updateAdminUI();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            isAdmin = false;
+            updateAdminUI();
+        });
+
+        function updateAdminUI() {
+            if (isAdmin) {
+                document.getElementById('btn-login-trigger').classList.add('hidden');
+                document.getElementById('btn-logout').classList.remove('hidden');
+                document.getElementById('upload-section').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-login-trigger').classList.remove('hidden');
+                document.getElementById('btn-logout').classList.add('hidden');
+                document.getElementById('upload-section').classList.add('hidden');
+            }
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
