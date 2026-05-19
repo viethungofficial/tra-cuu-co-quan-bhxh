@@ -28,55 +28,64 @@
 
         /* Ẩn hoàn toàn tất cả thanh cuộn trên toàn hệ thống nhưng vẫn cho cuộn */
         * {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         *::-webkit-scrollbar {
-            display: none; /* Chrome, Safari and Opera */
+            display: none;
         }
 
-        /* Hiệu ứng Tuyết rơi */
+        /* Hiệu ứng Tuyết rơi Rõ nét (Sử dụng Text Icon) */
         .snowflake {
             position: absolute;
-            top: -20px;
-            background-color: white;
-            border-radius: 50%;
-            filter: blur(1px);
+            top: -10vh;
+            color: rgba(255, 255, 255, 0.4);
+            pointer-events: none;
+            user-select: none;
             animation: fall linear infinite;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            font-family: Arial, sans-serif;
         }
         @keyframes fall {
-            0% { transform: translateY(-20px) translateX(0px); opacity: 0; }
+            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
             10% { opacity: 1; }
             90% { opacity: 1; }
-            100% { transform: translateY(105vh) translateX(20px); opacity: 0; }
+            100% { transform: translateY(110vh) translateX(20px) rotate(360deg); opacity: 0; }
         }
 
-        /* Khối giao diện Dark Smooth */
+        /* Khối giao diện Dark Smooth - Gọn gàng hơn */
         .smooth-panel {
             background-color: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 1rem;
+            border-radius: 0.75rem; /* Giảm bo góc */
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
 
+        /* Header của khối thu nhỏ lại */
         .panel-header {
             background: linear-gradient(90deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 0.8rem 1.25rem;
+            padding: 0.6rem 1rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.75rem; /* Chữ nhỏ lại */
             color: #f8fafc;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+
+        /* Tùy chỉnh thanh cuộn Dark cho bảng */
+        .custom-scroll::-webkit-scrollbar { display: block; width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.8); border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
         /* Tiêu đề bảng cố định */
         thead th {
@@ -84,14 +93,14 @@
             top: 0;
             z-index: 10;
             background-color: #0f172a !important; 
-            color: #38bdf8 !important; /* Sky 400 */
+            color: #38bdf8 !important;
             border-bottom: 1px solid rgba(255,255,255,0.05); 
         }
         
         /* Dòng dữ liệu mượt mà */
         tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.02); transition: background-color 0.2s ease; }
 
-        /* Thẻ Input/Select Dark Mượt */
+        /* Thẻ Input/Select Dark Mượt - Nhỏ gọn */
         .dark-input {
             background-color: rgba(2, 6, 23, 0.6); 
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -105,86 +114,82 @@
             background-color: rgba(15, 23, 42, 0.8);
         }
 
-        /* Loading Animation Logo Glow */
-        .logo-glow {
-            animation: pulse-glow 2s infinite alternate;
+        /* Loading Animation */
+        .tech-radar {
+            border: 2px dashed rgba(14, 165, 233, 0.3);
+            border-top: 2px solid #0ea5e9;
+            border-bottom: 2px solid #10b981;
+            animation: spin 3s linear infinite;
         }
-        @keyframes pulse-glow {
-            0% { filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.4)); transform: scale(0.98); }
-            100% { filter: drop-shadow(0 0 25px rgba(14, 165, 233, 0.8)); transform: scale(1.02); }
-        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Chống vỡ Layout trên Mobile */
+        /* Chống vỡ Layout, Responsive cho mọi thiết bị */
         @media (max-width: 1024px) {
             body { height: auto !important; min-height: 100vh; overflow: auto !important; }
-            .main-layout { flex-direction: column; overflow: visible !important; }
-            .sidebar-col { width: 100% !important; height: auto !important; }
-            .content-col { width: 100% !important; min-height: 600px; }
+            .main-layout { display: flex !important; flex-direction: column !important; min-height: auto !important; overflow: visible !important; }
+            .sidebar-col { width: 100% !important; height: auto !important; overflow: visible !important; }
+            .content-col { width: 100% !important; height: 600px !important; flex: none !important; }
+            #snow-container { height: 100% !important; position: fixed; }
         }
     </style>
 </head>
-<body class="text-[12px] flex flex-col h-screen overflow-hidden relative">
+<body class="text-[11px] flex flex-col h-screen overflow-hidden relative">
 
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
 
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="relative w-32 h-32 mb-6 flex justify-center items-center">
-            <!-- Vòng tròn trang trí mờ phía sau -->
+        <div class="relative w-28 h-28 mb-6 flex justify-center items-center">
             <div class="absolute inset-0 bg-sky-500/10 rounded-full blur-xl"></div>
-            <!-- Radar xoay -->
             <div class="absolute inset-0 rounded-full border-2 border-dashed border-sky-500/30 border-t-sky-500 animate-[spin_3s_linear_infinite]"></div>
-            <!-- Logo Loading mới -->
-            <img src="image_8b88ed.jpg" alt="Loading Logo" class="w-20 h-20 rounded-full object-cover relative z-10 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)] border-2 border-sky-500/50" onerror="this.style.display='none'">
+            <img src="image_8b88ed.jpg" alt="Loading Logo" class="w-16 h-16 rounded-full object-cover relative z-10 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)] border-2 border-sky-500/50" onerror="this.style.display='none'">
         </div>
-
-        <h2 class="text-xl font-extrabold text-white mb-4 tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-emerald-400 text-center">HỆ THỐNG DỮ LIỆU<br>BẢO HIỂM XÃ HỘI</h2>
-        
+        <h2 class="text-lg font-extrabold text-white mb-3 tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-emerald-400 text-center">HỆ THỐNG DỮ LIỆU<br>BẢO HIỂM XÃ HỘI</h2>
         <!-- Progress Bar -->
-        <div class="w-64 flex flex-col items-center mt-2">
+        <div class="w-56 flex flex-col items-center mt-2">
             <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                 <div id="loading-bar-fill" class="h-full bg-gradient-to-r from-sky-500 to-emerald-400 shadow-[0_0_10px_rgba(14,165,233,0.8)] transition-all duration-75 ease-linear" style="width: 0%"></div>
             </div>
-            <div class="flex justify-between w-full mt-3">
-                <span class="text-slate-500 text-[10px] uppercase tracking-wider font-semibold" id="loading-text">Đang đồng bộ dữ liệu</span>
-                <span id="loading-percentage" class="text-sky-400 text-xs font-bold font-mono">0%</span>
+            <div class="flex justify-between w-full mt-2">
+                <span class="text-slate-500 text-[9px] uppercase tracking-wider font-semibold" id="loading-text">Đang đồng bộ dữ liệu</span>
+                <span id="loading-percentage" class="text-sky-400 text-[10px] font-bold font-mono">0%</span>
             </div>
         </div>
     </div>
 
-    <!-- Header Dark Premium -->
-    <header class="bg-[#0b1120]/80 backdrop-blur-md border-b border-white/5 h-16 flex-shrink-0 relative z-40 shadow-lg">
+    <!-- Header Dark Premium (Thu gọn kích thước) -->
+    <header class="bg-[#0b1120]/80 backdrop-blur-md border-b border-white/5 h-14 flex-shrink-0 relative z-40 shadow-lg">
         <div class="w-full h-full px-4 sm:px-6 flex justify-between items-center">
             
             <!-- Trái: Logo + Tiêu đề -->
-            <div class="flex items-center gap-4">
-                <div class="p-1 bg-white/5 rounded-lg flex items-center justify-center border border-white/10 shadow-inner">
-                    <img src="logo-visnam.png" alt="Visnam" class="h-8 object-contain" onerror="this.style.display='none'">
+            <div class="flex items-center gap-3">
+                <div class="p-1 bg-white/5 rounded-md flex items-center justify-center border border-white/10 shadow-inner">
+                    <img src="logo-visnam.png" alt="Visnam" class="h-6 object-contain" onerror="this.style.display='none'">
                 </div>
                 <!-- Logo BHXH Hệ thống -->
-                <img src="logo-bhxh.png" alt="System Logo" class="h-9 w-auto object-contain hidden sm:block opacity-90" onerror="this.style.display='none'">
+                <img src="logo-bhxh.png" alt="System Logo" class="h-7 w-auto object-contain hidden sm:block opacity-90" onerror="this.style.display='none'">
                 
-                <div class="h-6 w-px bg-slate-700/50 hidden sm:block"></div>
+                <div class="h-5 w-px bg-slate-700/50 hidden sm:block"></div>
                 <div class="flex flex-col justify-center">
-                    <h1 class="font-extrabold text-[15px] text-white uppercase tracking-wider leading-none drop-shadow-md">TRA CỨU CƠ QUAN BHXH</h1>
-                    <p class="text-[9px] text-sky-400 font-semibold uppercase tracking-widest mt-1.5 leading-none">Công ty CP Thương Mại Visnam</p>
+                    <h1 class="font-extrabold text-[13px] sm:text-[14px] text-white uppercase tracking-wider leading-none drop-shadow-md">TRA CỨU CƠ QUAN BHXH</h1>
+                    <p class="text-[8px] text-sky-400 font-semibold uppercase tracking-widest mt-1 leading-none">Công ty CP Thương Mại Visnam</p>
                 </div>
             </div>
             
             <!-- Phải: Admin -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <!-- Nút Đăng nhập -->
-                <button id="btn-login-trigger" class="flex items-center gap-2 bg-slate-800/80 hover:bg-sky-900/50 text-sky-400 px-4 py-2 rounded-lg text-xs font-bold transition-all border border-slate-700 hover:border-sky-500/50 shadow-sm">
+                <button id="btn-login-trigger" class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-sky-900/50 text-sky-400 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-slate-700 hover:border-sky-500/50 shadow-sm">
                     <i class="fas fa-shield-alt"></i> <span class="hidden sm:inline">Admin</span>
                 </button>
                 
                 <!-- Nút Đăng xuất (Ẩn) -->
-                <div id="admin-user-info" class="hidden items-center gap-3">
-                    <span class="text-emerald-400 text-[10px] font-bold border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 rounded hidden md:block">
+                <div id="admin-user-info" class="hidden items-center gap-2">
+                    <span class="text-emerald-400 text-[9px] font-bold border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-1 rounded hidden md:block">
                         <i class="fas fa-check-circle"></i> Đã xác thực
                     </span>
-                    <button id="btn-logout" class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-xs font-bold transition-all border border-red-500/30">
+                    <button id="btn-logout" class="flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-red-500/30">
                         <i class="fas fa-sign-out-alt"></i> <span class="hidden sm:inline">Thoát</span>
                     </button>
                 </div>
@@ -192,132 +197,134 @@
         </div>
     </header>
 
-    <!-- Main Layout -->
-    <main class="w-full max-w-[1600px] mx-auto p-3 sm:p-4 gap-4 grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] relative z-10 items-stretch">
+    <!-- Main Layout: Lưới chuẩn, bảo vệ nội dung không bị mất -->
+    <main class="main-layout flex-1 w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0">
         
         <!-- CỘT TRÁI: SIDEBAR -->
-        <aside class="flex flex-col gap-4">
+        <aside class="sidebar-col flex flex-col gap-3 lg:h-full lg:overflow-y-auto hide-scrollbar pb-1">
             
             <!-- Bộ Lọc Tìm Kiếm -->
-            <div class="smooth-panel">
+            <div class="smooth-panel flex-shrink-0">
                 <div class="panel-header">
                     <i class="fas fa-filter text-sky-500"></i> BỘ LỌC TÌM KIẾM
                 </div>
-                <div class="p-4 space-y-3.5 bg-slate-900/20">
+                <div class="p-3 space-y-2.5 bg-slate-900/20">
                     <div class="relative">
-                        <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[11px]"></i>
-                        <select id="select-tinh" class="dark-input w-full pl-9 pr-3 py-2.5 rounded-lg text-xs font-medium appearance-none cursor-pointer">
+                        <i class="fas fa-map-marker-alt absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                        <select id="select-tinh" class="dark-input w-full pl-7 pr-2 py-1.5 rounded-md text-[11px] font-medium appearance-none cursor-pointer">
                             <option value="">Tỉnh/Thành phố...</option>
                         </select>
                     </div>
                     <div class="relative">
-                        <i class="fas fa-building absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[11px]"></i>
-                        <select id="select-coquan" class="dark-input w-full pl-9 pr-3 py-2.5 rounded-lg text-xs font-medium appearance-none cursor-pointer">
+                        <i class="fas fa-building absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                        <select id="select-coquan" class="dark-input w-full pl-7 pr-2 py-1.5 rounded-md text-[11px] font-medium appearance-none cursor-pointer">
                             <option value="">Cơ quan BHXH...</option>
                         </select>
                     </div>
                     <div class="relative">
-                        <input type="text" id="input-search" placeholder="Tên/mã xã tìm kiếm..." class="dark-input w-full pl-9 pr-3 py-2.5 rounded-lg text-xs font-medium" />
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[11px]"></i>
+                        <input type="text" id="input-search" placeholder="Tên/mã xã tìm kiếm..." class="dark-input w-full pl-7 pr-2 py-1.5 rounded-md text-[11px] font-medium" />
+                        <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Cổng Trực Tuyến -->
-            <div class="smooth-panel">
+            <div class="smooth-panel flex-shrink-0">
                 <div class="panel-header">
                     <i class="fas fa-globe text-sky-500"></i> Cổng Trực Tuyến
                 </div>
-                <div class="p-3 grid grid-cols-2 gap-2.5">
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-2 p-3 rounded-xl bg-slate-900/80 border border-white/5 hover:border-sky-500/50 hover:bg-slate-800 transition-all">
-                        <i class="fas fa-qrcode text-sky-400 text-lg"></i>
-                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Mã số<br>BHXH</span>
+                <div class="p-2.5 grid grid-cols-2 gap-2">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-sky-500/50 hover:bg-slate-800 transition-all">
+                        <i class="fas fa-qrcode text-sky-400 text-base"></i>
+                        <span class="text-[9px] font-bold text-slate-300 leading-tight">Mã số<br>BHXH</span>
                     </a>
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-2 p-3 rounded-xl bg-slate-900/80 border border-white/5 hover:border-emerald-500/50 hover:bg-slate-800 transition-all">
-                        <i class="fas fa-id-card text-emerald-400 text-lg"></i>
-                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Thẻ<br>BHYT</span>
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-emerald-500/50 hover:bg-slate-800 transition-all">
+                        <i class="fas fa-id-card text-emerald-400 text-base"></i>
+                        <span class="text-[9px] font-bold text-slate-300 leading-tight">Thẻ<br>BHYT</span>
                     </a>
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-2 p-3 rounded-xl bg-slate-900/80 border border-white/5 hover:border-purple-500/50 hover:bg-slate-800 transition-all">
-                        <i class="fas fa-building text-purple-400 text-lg"></i>
-                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Đơn vị<br>tham gia</span>
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-purple-500/50 hover:bg-slate-800 transition-all">
+                        <i class="fas fa-building text-purple-400 text-base"></i>
+                        <span class="text-[9px] font-bold text-slate-300 leading-tight">Đơn vị<br>tham gia</span>
                     </a>
-                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" class="flex flex-col items-center justify-center text-center gap-2 p-3 rounded-xl bg-slate-900/80 border border-white/5 hover:border-orange-500/50 hover:bg-slate-800 transition-all">
-                        <i class="fas fa-laptop-house text-orange-400 text-lg"></i>
-                        <span class="text-[10px] font-bold text-slate-300 leading-tight">Dịch vụ<br>công</span>
+                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-orange-500/50 hover:bg-slate-800 transition-all">
+                        <i class="fas fa-laptop-house text-orange-400 text-base"></i>
+                        <span class="text-[9px] font-bold text-slate-300 leading-tight">Dịch vụ<br>công</span>
                     </a>
                 </div>
             </div>
 
             <!-- Liên Hệ Hỗ Trợ -->
-            <div class="smooth-panel flex-1 flex flex-col justify-end">
+            <div class="smooth-panel mt-auto flex-shrink-0">
                 <div class="panel-header flex-shrink-0">
-                    <i class="fas fa-headset text-sky-500"></i> Liên Hệ Hỗ Trợ
+                    <i class="fas fa-headset text-sky-500"></i> Liên Hệ
                 </div>
-                <div class="p-3.5 flex-1 flex flex-col justify-center bg-slate-900/30">
-                    <div class="grid grid-cols-2 gap-2.5 mb-2.5">
-                        <a href="tel:19006134" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-rose-500/30 transition-all group">
-                            <i class="fas fa-phone-alt text-rose-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">1900.6134</span>
+                <div class="p-3 flex flex-col justify-center bg-slate-900/30">
+                    <!-- Dòng 1 -->
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <a href="tel:19006134" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-rose-500/30 transition-all group">
+                            <i class="fas fa-phone-alt text-rose-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">1900.6134</span>
                         </a>
-                        <a href="https://visnam.com/" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-sky-500/30 transition-all group">
-                            <i class="fas fa-globe text-sky-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Website</span>
+                        <a href="https://visnam.com/" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-sky-500/30 transition-all group">
+                            <i class="fas fa-globe text-sky-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Website</span>
                         </a>
                     </div>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-blue-500/30 transition-all group">
-                            <i class="fas fa-comment-dots text-blue-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Zalo OA</span>
+                    <!-- Dòng 2 -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-blue-500/30 transition-all group">
+                            <i class="fas fa-comment-dots text-blue-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Zalo OA</span>
                         </a>
-                        <a href="https://www.facebook.com/visnamcorp" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-indigo-500/30 transition-all group">
-                            <i class="fab fa-facebook-f text-indigo-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Fanpage</span>
+                        <a href="https://www.facebook.com/visnamcorp" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-indigo-500/30 transition-all group">
+                            <i class="fab fa-facebook-f text-indigo-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Fanpage</span>
                         </a>
                     </div>
                 </div>
-                <div class="py-3 text-center bg-slate-900 border-t border-white/5 flex-shrink-0">
-                    <p class="text-[9px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year"></span> VISNAM JSC.</p>
+                <div class="py-2.5 text-center bg-slate-900 border-t border-white/5">
+                    <p class="text-[8px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year"></span> VISNAM JSC.</p>
                 </div>
             </div>
         </aside>
 
-        <!-- CỘT PHẢI: BẢNG DỮ LIỆU TỐI ĐA -->
-        <section class="smooth-panel flex flex-col h-[600px] lg:h-auto">
+        <!-- CỘT PHẢI: BẢNG KẾT QUẢ TỐI ĐA -->
+        <section class="content-col smooth-panel flex-1 flex flex-col min-h-0">
             <div class="panel-header justify-between flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-table text-sky-500"></i> BẢNG TRÍCH XUẤT DỮ LIỆU
                 </div>
                 
-                <div class="flex items-center gap-3">
-                    <div id="upload-message" class="hidden text-sky-400 text-[10px] font-bold px-2 py-1 rounded"></div>
+                <div class="flex items-center gap-2">
+                    <div id="upload-message" class="hidden text-sky-400 text-[9px] font-bold px-2 py-1 rounded"></div>
                     
                     <!-- Nút Upload ẩn đi, chỉ hiện khi Firebase Auth Admin -->
                     <div id="upload-section" class="hidden">
                         <input type="file" id="excelUpload" accept=".xlsx, .xls" class="hidden" />
-                        <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 px-4 py-1.5 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-2 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                            <i class="fas fa-cloud-upload-alt text-sm"></i> TẢI LÊN EXCEL
+                        <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-[9px] font-bold transition-colors flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                            <i class="fas fa-cloud-upload-alt"></i> TẢI EXCEL
                         </label>
                     </div>
 
-                    <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 shadow-inner">
-                        <i class="fas fa-spinner fa-spin mr-1"></i> Đang tính...
+                    <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
+                        <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
                     </span>
                 </div>
             </div>
             
-            <!-- Vùng Thanh Cuộn Bảng -->
+            <!-- Vùng Thanh Cuộn Bảng - Box Absolute bám dính -->
             <div class="flex-1 relative w-full min-h-0 bg-[#0b1120]/50">
-                <div class="absolute inset-0 overflow-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
+                <div class="absolute inset-0 custom-scroll overflow-auto">
+                    <table class="w-full text-left border-collapse min-w-[650px]">
                         <thead>
                             <tr>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest w-12 text-center text-slate-400">STT</th>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">Mã Tỉnh</th>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">Tên Tỉnh</th>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">Mã CQ</th>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">Tên Cơ Quan</th>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">Mã Xã</th>
-                                <th class="px-5 py-3.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">Tên Phường/Xã</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest w-10 text-center text-slate-400">STT</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã Tỉnh</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Tỉnh</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã CQ</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Cơ Quan</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã Xã</th>
+                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Phường/Xã</th>
                             </tr>
                         </thead>
                         <tbody id="table-body">
@@ -331,34 +338,34 @@
 
     <!-- Modal Admin Firebase Login Dark -->
     <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity">
-        <div class="smooth-panel w-full max-w-[340px] border border-sky-500/30 shadow-[0_0_40px_rgba(56,189,248,0.2)]">
-            <div class="p-5 border-b border-white/5 bg-slate-900 text-center relative">
-                <button id="btn-close-login" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
+        <div class="smooth-panel w-full max-w-[320px] border border-sky-500/30 shadow-[0_0_40px_rgba(56,189,248,0.2)]">
+            <div class="p-4 border-b border-white/5 bg-slate-900 text-center relative">
+                <button id="btn-close-login" class="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
-                <div class="w-12 h-12 bg-sky-500/10 rounded-full flex items-center justify-center mx-auto mb-3 border border-sky-500/30">
-                    <i class="fas fa-lock text-sky-500 text-xl"></i>
+                <div class="w-10 h-10 bg-sky-500/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-sky-500/30">
+                    <i class="fas fa-lock text-sky-500 text-lg"></i>
                 </div>
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider">ĐĂNG NHẬP ADMIN</h3>
-                <p class="text-[10px] text-slate-400 mt-1">Kết nối Firebase Authentication</p>
+                <h3 class="text-[13px] font-bold text-white uppercase tracking-wider">ĐĂNG NHẬP ADMIN</h3>
+                <p class="text-[9px] text-slate-400 mt-1">Kết nối Firebase Authentication</p>
             </div>
             
-            <form id="login-form" class="p-6 space-y-4 bg-[#020617]">
+            <form id="login-form" class="p-5 space-y-3 bg-[#020617]">
                 
-                <div id="login-error" class="hidden text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-lg text-[11px] font-bold text-center">
+                <div id="login-error" class="hidden text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg text-[10px] font-bold text-center">
                     <i class="fas fa-exclamation-circle mr-1"></i> Sai email hoặc mật khẩu!
                 </div>
                 
                 <div class="relative">
-                    <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-[11px]"></i>
-                    <input type="email" id="email" placeholder="Email quản trị" required class="dark-input w-full pl-9 pr-3 py-3 text-xs rounded-lg font-medium" />
+                    <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                    <input type="email" id="email" placeholder="Email quản trị" required class="dark-input w-full pl-8 pr-3 py-2 text-[11px] rounded-md font-medium" />
                 </div>
                 <div class="relative">
-                    <i class="fas fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-[11px]"></i>
-                    <input type="password" id="password" placeholder="Mật khẩu" required class="dark-input w-full pl-9 pr-3 py-3 text-xs rounded-lg font-medium" />
+                    <i class="fas fa-key absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                    <input type="password" id="password" placeholder="Mật khẩu" required class="dark-input w-full pl-8 pr-3 py-2 text-[11px] rounded-md font-medium" />
                 </div>
 
-                <button type="submit" id="btn-login-submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold py-3 rounded-lg text-xs tracking-wider transition-all mt-4 shadow-[0_0_15px_rgba(14,165,233,0.3)] hover:shadow-[0_0_20px_rgba(14,165,233,0.5)]">
+                <button type="submit" id="btn-login-submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold py-2.5 rounded-md text-[11px] tracking-wider transition-all mt-3 shadow-[0_0_15px_rgba(14,165,233,0.3)] hover:shadow-[0_0_20px_rgba(14,165,233,0.5)]">
                     ĐĂNG NHẬP
                 </button>
             </form>
@@ -369,18 +376,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const snowContainer = document.getElementById('snow-container');
-            const flakeCount = 40; // Số lượng bông tuyết
+            const flakeCount = 100; // Tăng lượng tuyết theo yêu cầu
+            const snowIcons = ['❄', '❅', '❆']; // Icon tuyết thật rõ nét
             
             for (let i = 0; i < flakeCount; i++) {
                 const flake = document.createElement('div');
                 flake.className = 'snowflake';
+                flake.innerHTML = snowIcons[Math.floor(Math.random() * snowIcons.length)];
                 
-                // Randomize properties
-                const size = Math.random() * 3 + 2; 
-                flake.style.width = size + 'px';
-                flake.style.height = size + 'px';
+                const size = Math.random() * 12 + 8; // Kích thước từ 8px đến 20px
+                flake.style.fontSize = size + 'px';
                 flake.style.left = Math.random() * 100 + 'vw';
-                flake.style.opacity = Math.random() * 0.4 + 0.1; 
+                flake.style.opacity = Math.random() * 0.6 + 0.2; 
                 flake.style.animationDuration = Math.random() * 15 + 10 + 's'; 
                 flake.style.animationDelay = Math.random() * -20 + 's'; 
                 
@@ -453,58 +460,54 @@
             }, 300);
         }
 
-        // Đảm bảo chỉ đăng ký snapshot listener 1 lần
-        let isDataInitialized = false;
-
+        // Lắng nghe trạng thái đăng nhập từ Firebase Auth
         if(isFirebaseActive) {
-            onAuthStateChanged(auth, async (user) => {
-                // Phân quyền Admin / Khách
-                if (user) {
-                    if (!user.isAnonymous && user.email) {
-                        isAdmin = true;
-                    } else {
-                        isAdmin = false;
-                    }
+            onAuthStateChanged(auth, (user) => {
+                if (user && !user.isAnonymous && user.email) {
+                    isAdmin = true; 
                 } else {
-                    isAdmin = false;
-                    try {
-                        await signInAnonymously(auth);
-                        return; // Nó sẽ kích hoạt lại onAuthStateChanged
-                    } catch(e) {
-                        console.warn("Chưa bật Anonymous Auth trên Firebase.");
-                    }
+                    isAdmin = false; 
                 }
-                
                 updateAdminUI();
-
-                // Nạp dữ liệu 1 lần duy nhất cho mọi thay đổi session sau đó
-                if (!isDataInitialized) {
-                    isDataInitialized = true;
-                    const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
-                    onSnapshot(dataCollectionRef, (snapshot) => {
-                        let allLoadedData = [];
-                        snapshot.forEach(doc => {
-                            if(doc.id.startsWith('chunk_')) {
-                                try {
-                                    const chunkArray = JSON.parse(doc.data().payload);
-                                    allLoadedData = allLoadedData.concat(chunkArray);
-                                } catch(e) {}
-                            }
-                        });
-
-                        if(allLoadedData.length > 0) {
-                            currentData = allLoadedData;
-                            refreshUI();
-                        }
-                        loadingFinished = true;
-                    }, (error) => { loadingFinished = true; });
-                }
             });
-        } else {
-            loadingFinished = true;
         }
 
-        // Xử lý Upload Excel (Chỉ thực hiện được khi Admin)
+        async function initFirebaseAuthAndData() {
+            if(!isFirebaseActive) {
+                loadingFinished = true;
+                return;
+            }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
+                const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
+                onSnapshot(dataCollectionRef, (snapshot) => {
+                    let allLoadedData = [];
+                    snapshot.forEach(doc => {
+                        if(doc.id.startsWith('chunk_')) {
+                            try {
+                                const chunkArray = JSON.parse(doc.data().payload);
+                                allLoadedData = allLoadedData.concat(chunkArray);
+                            } catch(e) {}
+                        }
+                    });
+
+                    if(allLoadedData.length > 0) {
+                        currentData = allLoadedData;
+                        refreshUI();
+                    }
+                    loadingFinished = true;
+                }, (error) => { loadingFinished = true; });
+            } catch (error) { loadingFinished = true; }
+        }
+        
+        initFirebaseAuthAndData();
+
+        // Xử lý Upload Excel (Chỉ Admin)
         document.getElementById('excelUpload').addEventListener('change', async function(e) {
             if (!isAdmin) return;
             const file = e.target.files[0];
@@ -512,7 +515,7 @@
 
             const label = document.getElementById('upload-label');
             const originalLabelText = label.innerHTML;
-            label.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang tải lên...';
+            label.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Uploading...';
 
             const reader = new FileReader();
             reader.onload = async function(event) {
@@ -554,15 +557,15 @@
                                 const docRef = doc(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data', `chunk_${i}`);
                                 await setDoc(docRef, { payload: JSON.stringify(chunk) });
                             }
-                            showUploadMessage(`<i class="fas fa-check-circle mr-1"></i> Đã lưu ${parsedData.length} dòng lên Cloud.`);
+                            showUploadMessage(`<i class="fas fa-check-circle mr-1"></i> Lưu OK.`);
                         } else {
-                            showUploadMessage(`<i class="fas fa-exclamation-triangle mr-1"></i> Không có quyền ghi.`, true);
+                            showUploadMessage(`<i class="fas fa-exclamation-triangle mr-1"></i> Từ chối ghi.`, true);
                         }
                     } else {
-                        showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> File lỗi/Trống', true);
+                        showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> File lỗi', true);
                     }
                 } catch (error) {
-                    showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> Lỗi đọc file', true);
+                    showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> Lỗi đọc', true);
                 } finally {
                     label.innerHTML = originalLabelText;
                     e.target.value = ''; 
@@ -639,8 +642,8 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" class="px-4 py-20 text-center text-slate-500">
-                            <i class="fas fa-folder-open text-4xl mb-3 text-slate-700"></i>
-                            <p class="font-bold text-[12px] text-slate-400 tracking-wider">KHÔNG CÓ DỮ LIỆU</p>
+                            <i class="fas fa-folder-open text-3xl mb-3 text-slate-700"></i>
+                            <p class="font-bold text-[11px] text-slate-400 tracking-wider">KHÔNG CÓ DỮ LIỆU</p>
                         </td>
                     </tr>`;
                 return;
@@ -651,17 +654,17 @@
             displayData.forEach((row, idx) => {
                 html += `
                     <tr>
-                        <td class="px-5 py-3 text-[11px] text-slate-500 text-center">${row.stt || (idx + 1)}</td>
-                        <td class="px-5 py-3 text-[11px] font-bold text-sky-500">${row.maTinh}</td>
-                        <td class="px-5 py-3 text-[12px] text-slate-200">${row.tenTinh}</td>
-                        <td class="px-5 py-3 text-[11px] font-bold text-teal-400">${row.maCoQuan}</td>
-                        <td class="px-5 py-3 text-[12px] font-medium text-slate-300">${row.tenCoQuan}</td>
-                        <td class="px-5 py-3 text-[11px] text-slate-500">${row.maXa}</td>
-                        <td class="px-5 py-3 text-[12px] text-slate-300">${row.tenXa}</td>
+                        <td class="px-3 py-2.5 text-[10px] text-slate-500 text-center">${row.stt || (idx + 1)}</td>
+                        <td class="px-3 py-2.5 text-[10px] font-bold text-sky-500">${row.maTinh}</td>
+                        <td class="px-3 py-2.5 text-[11px] text-slate-200">${row.tenTinh}</td>
+                        <td class="px-3 py-2.5 text-[10px] font-bold text-teal-400">${row.maCoQuan}</td>
+                        <td class="px-3 py-2.5 text-[11px] font-medium text-slate-300">${row.tenCoQuan}</td>
+                        <td class="px-3 py-2.5 text-[10px] text-slate-500">${row.maXa}</td>
+                        <td class="px-3 py-2.5 text-[11px] text-slate-300">${row.tenXa}</td>
                     </tr>`;
             });
             if(filteredData.length > 500){
-                html += `<tr><td colspan="7" class="text-center py-2.5 text-[10px] text-sky-500 bg-slate-900/50 font-medium border-t border-white/5">Hiển thị 500 dòng đầu. Dùng bộ lọc để thu hẹp tìm kiếm.</td></tr>`;
+                html += `<tr><td colspan="7" class="text-center py-2 text-[9px] text-sky-500 bg-slate-900/50 font-medium border-t border-white/5 uppercase">Đang hiển thị 500 dòng đầu.</td></tr>`;
             }
             tbody.innerHTML = html;
         }
