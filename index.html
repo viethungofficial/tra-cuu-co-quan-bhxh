@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tra Cứu Cơ Quan BHXH - Visnam</title>
     
+    <!-- Favicon (Thiết kế kết hợp: Khiên bảo vệ + Kính lúp + Công nghệ) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e3a8a'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 10L15 25v20c0 25 30 40 35 45 5-5 35-20 35-45V25Z' fill='url(%23g)'/%3E%3Ccircle cx='40' cy='45' r='14' fill='none' stroke='%23fff' stroke-width='6'/%3E%3Cline x1='50' y1='55' x2='70' y2='75' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='20' r='4' fill='%2360a5fa'/%3E%3Ccircle cx='25' cy='40' r='4' fill='%2360a5fa'/%3E%3Ccircle cx='75' cy='40' r='4' fill='%2360a5fa'/%3E%3Cpath d='M50 20v25M25 40l15 5M75 40l-21 5' stroke='%2360a5fa' stroke-width='2'/%3E%3C/svg%3E">
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -49,7 +52,7 @@
             <i data-lucide="shield-check" class="absolute inset-0 m-auto text-blue-500 w-8 h-8 animate-pulse"></i>
         </div>
         <h1 class="text-xl font-bold tracking-widest mb-2 text-slate-100">HỆ THỐNG TRA CỨU</h1>
-        <p class="text-slate-400 text-xs animate-pulse" id="loading-text">Đang kết nối cơ sở dữ liệu...</p>
+        <p class="text-slate-400 text-xs animate-pulse" id="loading-text">Đang khởi tạo ứng dụng...</p>
     </div>
 
     <!-- MAIN APP CONTENT -->
@@ -78,13 +81,15 @@
                             Tra Cứu Cơ Quan BHXH
                         </h1>
                         <p class="text-slate-400 font-medium text-[11px]">
-                            Cung cấp bởi Công ty Cổ phần Thương mại Visnam
+                            Công ty Cổ phần Thương mại Visnam
                         </p>
                     </div>
                 </div>
                 
-                <div class="flex items-center bg-slate-900 p-2 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors" id="btn-login-trigger" title="Đăng nhập Quản trị">
+                <div class="flex items-center bg-slate-900 p-2 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors relative" id="btn-login-trigger" title="Đăng nhập Quản trị">
                     <img src="photo-img-638326152567188994.png" alt="Logo Visnam" class="h-8 w-auto object-contain drop-shadow-md" onerror="this.onerror=null; this.style.display='none'">
+                    <!-- Dot hiển thị trạng thái kết nối -->
+                    <span id="connection-status" class="absolute -top-1 -right-1 w-3 h-3 bg-slate-500 rounded-full border-2 border-slate-900" title="Chưa kết nối"></span>
                 </div>
             </div>
         </header>
@@ -103,11 +108,10 @@
                                 <i data-lucide="monitor-smartphone" class="w-4 h-4 text-blue-400"></i>
                                 Cổng trực tuyến
                             </h3>
-                            <!-- Nút Edit dành cho Admin -->
                             <button id="btn-edit-links" class="hidden text-blue-400 hover:text-blue-300 p-1 rounded hover:bg-slate-700"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
                         </div>
                         <div class="grid grid-cols-2 gap-2 flex-1 content-start" id="ui-links-container">
-                            <!-- Sẽ được render qua JS từ Firebase -->
+                            <!-- JS render -->
                         </div>
                     </div>
 
@@ -122,7 +126,7 @@
                         </div>
                         
                         <div class="p-4 flex flex-col gap-2.5 flex-1 justify-start" id="ui-contacts-container">
-                            <!-- Sẽ được render qua JS từ Firebase -->
+                            <!-- JS render -->
                         </div>
                     </div>
 
@@ -143,6 +147,11 @@
                             <button id="btn-admin-dashboard" class="hidden bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 border border-emerald-500/30">
                                 <i data-lucide="database" class="w-3.5 h-3.5"></i> Quản lý Dữ liệu
                             </button>
+                        </div>
+                        
+                        <!-- Cảnh báo lỗi Firebase (nếu có) -->
+                        <div id="firebase-error-alert" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-xs mb-4">
+                            ⚠️ Không thể tải dữ liệu từ Firebase. Vui lòng kiểm tra lại cấu hình tên miền (Authorized domains) hoặc bật chế độ Anonymous Authentication trên bảng điều khiển Firebase. Hệ thống đang hiển thị giao diện mẫu.
                         </div>
                         
                         <form id="search-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -256,7 +265,7 @@
         </div>
     </div>
 
-    <!-- MODAL: ADMIN DASHBOARD (Upload Data / Manage UI) -->
+    <!-- MODAL: ADMIN DASHBOARD -->
     <div id="modal-admin" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900/80 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0">
@@ -270,20 +279,17 @@
                 </div>
             </div>
             
-            <!-- Tabs -->
             <div class="flex border-b border-slate-700 bg-slate-900/30">
                 <button type="button" class="admin-tab active flex-1 py-3 text-sm font-semibold text-blue-400 border-b-2 border-blue-500" data-target="tab-upload">1. Upload Dữ liệu (Excel)</button>
                 <button type="button" class="admin-tab flex-1 py-3 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200" data-target="tab-ui">2. Quản lý Giao diện (Icon/Link)</button>
             </div>
 
-            <!-- Tab Content -->
             <div class="p-6 overflow-y-auto flex-1 bg-slate-800">
-                
                 <!-- TAB UPLOAD EXCEL -->
                 <div id="tab-upload" class="tab-pane block">
                     <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
                         <p class="text-blue-300 text-xs leading-relaxed">
-                            <strong class="text-blue-400">Hướng dẫn:</strong> Chọn file Excel (.xlsx hoặc .csv) chứa danh sách Cơ quan BHXH. Hệ thống tự động đọc và đồng bộ lên Đám mây. Khuyến cáo file có chứa các cột: <em>Mã tỉnh, Tên tỉnh, Mã cơ quan BHXH, Tên cơ quan BHXH, Mã xã, Tên xã quản lý</em>.
+                            <strong class="text-blue-400">Hướng dẫn:</strong> Chọn file Excel (.xlsx hoặc .csv) chứa danh sách Cơ quan BHXH. Khuyến cáo file có chứa các cột: <em>Mã tỉnh, Tên tỉnh, Mã cơ quan BHXH, Tên cơ quan BHXH, Mã xã, Tên xã quản lý</em>.
                         </p>
                     </div>
                     <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-xl p-8 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500 transition-colors">
@@ -308,7 +314,7 @@
                         <h4 class="font-bold text-white text-sm">Chỉnh sửa JSON Cấu hình Cổng Dịch Vụ & Liên hệ</h4>
                         <button type="button" id="btn-save-ui" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-1.5 px-4 rounded transition-colors">Lưu thay đổi</button>
                     </div>
-                    <p class="text-xs text-slate-400 mb-2">Bạn có thể thay đổi tên, icon (theo tên lucide icon), hoặc link. Lưu ý giữ nguyên cấu trúc ngoặc vuông [ ].</p>
+                    <p class="text-xs text-slate-400 mb-2">Bạn có thể thay đổi tên, icon (theo tên lucide icon), hoặc link.</p>
                     <textarea id="json-ui-editor" class="w-full h-64 bg-slate-900 border border-slate-700 rounded-lg p-4 text-xs font-mono text-emerald-400 focus:outline-none focus:ring-1 focus:ring-blue-500" spellcheck="false"></textarea>
                     <p id="ui-save-status" class="text-emerald-400 text-xs mt-2 text-right hidden">Đã lưu thành công!</p>
                 </div>
@@ -317,100 +323,14 @@
     </div>
 
 
-    <!-- ================= SCRIPT CƠ BẢN (KHÔNG CHỨA MODULE - LUÔN HOẠT ĐỘNG) ================= -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. Khởi tạo Icon an toàn
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-
-            // 2. Chống treo Loading - Tự động mở sau 3 giây
-            setTimeout(() => {
-                const ls = document.getElementById('loading-screen');
-                if (ls && !ls.classList.contains('hidden')) {
-                    document.getElementById('loading-text').textContent = 'Đang tải dữ liệu bộ lọc...';
-                    ls.classList.add('opacity-0');
-                    setTimeout(() => {
-                        ls.classList.add('hidden');
-                        document.getElementById('app-content').classList.remove('hidden');
-                    }, 500);
-                }
-            }, 3000);
-
-            // 3. Đồng hồ thời gian thực
-            function updateClock() {
-                const now = new Date();
-                const dd = String(now.getDate()).padStart(2, '0');
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const yyyy = now.getFullYear();
-                const hh = String(now.getHours()).padStart(2, '0');
-                const min = String(now.getMinutes()).padStart(2, '0');
-                const ss = String(now.getSeconds()).padStart(2, '0');
-                const el = document.getElementById('current-time');
-                if(el) el.textContent = `${dd}/${mm}/${yyyy} - ${hh}:${min}:${ss}`;
-            }
-            updateClock();
-            setInterval(updateClock, 1000);
-
-            // 4. Modal Triggers
-            document.querySelectorAll('[data-close-modal]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const modalId = e.currentTarget.getAttribute('data-close-modal');
-                    document.getElementById(modalId).classList.add('hidden');
-                });
-            });
-
-            // 5. Admin Tabs
-            document.querySelectorAll('.admin-tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    document.querySelectorAll('.admin-tab').forEach(t => {
-                        t.classList.remove('text-blue-400', 'border-blue-500');
-                        t.classList.add('text-slate-400', 'border-transparent');
-                    });
-                    e.currentTarget.classList.remove('text-slate-400', 'border-transparent');
-                    e.currentTarget.classList.add('text-blue-400', 'border-blue-500');
-                    
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-                    document.getElementById(e.currentTarget.dataset.target).classList.remove('hidden');
-                });
-            });
-
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-        });
-    </script>
-
-
-    <!-- ================= SCRIPT FIREBASE CHÍNH ================= -->
+    <!-- ================= SCRIPT CHÍNH (GỘP ĐỒNG BỘ ĐỂ CHỐNG SẬP UI TRÊN DEPLOY) ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CẤU HÌNH FIREBASE CỦA BẠN (Cập nhật đầy đủ databaseURL & getAnalytics)
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-QUv2MgckcmqMbSTfksI0TUQCiTYW_PE",
-            authDomain: "tra-cuu-co-quan-bhxh.firebaseapp.com",
-            databaseURL: "https://tra-cuu-co-quan-bhxh-default-rtdb.firebaseio.com",
-            projectId: "tra-cuu-co-quan-bhxh",
-            storageBucket: "tra-cuu-co-quan-bhxh.firebasestorage.app",
-            messagingSenderId: "810791838843",
-            appId: "1:810791838843:web:401b9788d01255cc8beede",
-            measurementId: "G-T1JDKMSK26"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Path bắt buộc lưu trữ để đảm bảo quyền truy cập an toàn
-        const APP_ID = typeof window !== 'undefined' && window.__app_id ? window.__app_id : 'visnam-bhxh-app';
-        const docRefData = doc(db, 'artifacts', APP_ID, 'public', 'data', 'mainData', 'default');
-        const docRefUI = doc(db, 'artifacts', APP_ID, 'public', 'data', 'uiConfig', 'default');
-
-        // ================= GLOBAL STATE =================
+        // ================= GLOBAL STATE (MẶC ĐỊNH SẼ LUÔN ĐƯỢC RENDER TRƯỚC DÙ MẠNG LỖI) =================
         let dbData = [];
         let uiConfig = {
             links: [
@@ -427,258 +347,350 @@
             ]
         };
 
-        let isAdmin = false;
-        let unsubscribeData = null;
-        let unsubscribeUI = null;
-
-        // ================= KHỞI TẠO AUTH =================
-        const initApp = async () => {
-            try {
-                if (typeof window !== 'undefined' && window.__initial_auth_token) {
-                    await signInWithCustomToken(auth, window.__initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Lỗi xác thực Firebase:", error);
-                document.getElementById('loading-text').textContent = "Sử dụng dữ liệu tĩnh...";
-                hideLoading();
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    isAdmin = !user.isAnonymous;
-                    updateAdminUI();
-                    if(!unsubscribeData) listenToData();
-                    if(!unsubscribeUI) listenToUIConfig();
-                }
-            });
-        };
-
-        // ================= FIRESTORE LISTENERS =================
-        function listenToData() {
-            unsubscribeData = onSnapshot(docRefData, (docSnap) => {
-                hideLoading();
-                if (docSnap.exists()) {
-                    const savedData = docSnap.data().dataString;
-                    if(savedData) {
-                        try { dbData = JSON.parse(savedData); } catch(e) {}
-                    }
-                } else {
-                    dbData = [];
-                }
-                
-                initFilters();
-                document.getElementById('empty-title').textContent = dbData.length > 0 ? "Nhập tiêu chí để tìm kiếm" : "Chưa có dữ liệu nào trên hệ thống";
-            }, (error) => {
-                console.error("Snapshot Data error:", error);
-                hideLoading();
-            });
-        }
-
-        function listenToUIConfig() {
-            unsubscribeUI = onSnapshot(docRefUI, (docSnap) => {
-                if (docSnap.exists()) {
-                    const savedUI = docSnap.data().jsonStr;
-                    if(savedUI) {
-                        try { uiConfig = JSON.parse(savedUI); } catch(e) {}
-                    }
-                }
-                renderUIConfig();
-            });
-        }
-
-        // ================= GIAO DIỆN ADMIN =================
-        const btnLoginTrigger = document.getElementById('btn-login-trigger');
-        const modalLogin = document.getElementById('modal-login');
-        const formLogin = document.getElementById('form-login');
-        const loginError = document.getElementById('login-error');
-        const modalAdmin = document.getElementById('modal-admin');
-        const btnAdminDash = document.getElementById('btn-admin-dashboard');
-        
-        function updateAdminUI() {
-            if(isAdmin) {
-                btnAdminDash.classList.remove('hidden');
-                document.getElementById('btn-edit-links').classList.remove('hidden');
-                document.getElementById('btn-edit-contacts').classList.remove('hidden');
-            } else {
-                btnAdminDash.classList.add('hidden');
-                document.getElementById('btn-edit-links').classList.add('hidden');
-                document.getElementById('btn-edit-contacts').classList.add('hidden');
-            }
-        }
-
-        btnLoginTrigger.addEventListener('click', () => {
-            if(isAdmin) {
-                modalAdmin.classList.remove('hidden');
-                document.getElementById('json-ui-editor').value = JSON.stringify(uiConfig, null, 4);
-            } else {
-                modalLogin.classList.remove('hidden');
-                loginError.classList.add('hidden');
-            }
-        });
-
-        formLogin.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const em = document.getElementById('login-email').value;
-            const pw = document.getElementById('login-password').value;
-            try {
-                await signInWithEmailAndPassword(auth, em, pw);
-                modalLogin.classList.add('hidden');
-                modalAdmin.classList.remove('hidden');
-                document.getElementById('json-ui-editor').value = JSON.stringify(uiConfig, null, 4);
-            } catch (err) {
-                loginError.classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('btn-logout').addEventListener('click', async () => {
-            await signOut(auth);
-            modalAdmin.classList.add('hidden');
-        });
-
-        // ================= XỬ LÝ UPLOAD EXCEL (SHEETJS) =================
-        const fileInput = document.getElementById('excel-file');
-        const fileNameDisplay = document.getElementById('file-name-display');
-        const btnSync = document.getElementById('btn-sync-data');
-        const uploadStatus = document.getElementById('upload-status');
-        let parsedDataCache = null;
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            fileNameDisplay.textContent = file.name;
-            btnSync.disabled = true;
-            uploadStatus.textContent = "Đang đọc file...";
-            uploadStatus.className = "text-center text-xs mt-3 font-medium text-blue-400";
-
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    const data = evt.target.result;
-                    const wb = XLSX.read(data, {type: 'binary'});
-                    const wsname = wb.SheetNames[0];
-                    const ws = wb.Sheets[wsname];
-                    const rawJson = XLSX.utils.sheet_to_json(ws, { defval: "" });
-                    
-                    parsedDataCache = rawJson.map(row => ({
-                        maTinh: String(row['Mã tỉnh'] || row['Mã Tỉnh'] || row['maTinh'] || ''),
-                        tenTinh: String(row['Tên tỉnh'] || row['Tên Tỉnh'] || row['tenTinh'] || ''),
-                        maCoQuan: String(row['Mã cơ quan BHXH'] || row['Mã CQ BHXH'] || row['maCoQuan'] || ''),
-                        tenCoQuan: String(row['Tên cơ quan BHXH'] || row['Tên Cơ quan BHXH'] || row['Tên cơ quan'] || ''),
-                        maXa: String(row['Mã xã'] || row['Mã Xã'] || row['maXa'] || ''),
-                        tenXa: String(row['Tên xã quản lý'] || row['Tên Xã quản lý'] || row['tenXa'] || '')
-                    })).filter(r => r.tenTinh || r.tenCoQuan);
-
-                    btnSync.disabled = false;
-                    uploadStatus.textContent = `Đọc thành công ${parsedDataCache.length} dòng. Nhấn "Đồng bộ" để lưu.`;
-                    uploadStatus.className = "text-center text-xs mt-3 font-medium text-emerald-400";
-                } catch (err) {
-                    uploadStatus.textContent = "Lỗi đọc file. Vui lòng kiểm tra định dạng.";
-                    uploadStatus.className = "text-center text-xs mt-3 font-medium text-red-400";
-                }
-            };
-            reader.readAsBinaryString(file);
-        });
-
-        btnSync.addEventListener('click', async () => {
-            if(!isAdmin || !parsedDataCache) return;
-            btnSync.disabled = true;
-            uploadStatus.textContent = "Đang đẩy dữ liệu lên Cloud...";
-            uploadStatus.className = "text-center text-xs mt-3 font-medium text-blue-400";
-
-            try {
-                const dataStr = JSON.stringify(parsedDataCache);
-                await setDoc(docRefData, { dataString: dataStr, updatedAt: new Date() });
-                
-                uploadStatus.textContent = "Đồng bộ Cloud thành công!";
-                uploadStatus.className = "text-center text-xs mt-3 font-medium text-emerald-400";
-                setTimeout(() => { modalAdmin.classList.add('hidden'); uploadStatus.textContent = ''; }, 1500);
-            } catch(e) {
-                uploadStatus.textContent = "Lỗi kết nối Firebase (Cần quyền Admin).";
-                uploadStatus.className = "text-center text-xs mt-3 font-medium text-red-400";
-                btnSync.disabled = false;
-            }
-        });
-
-        // ================= XỬ LÝ LƯU CẤU HÌNH GIAO DIỆN =================
-        document.getElementById('btn-save-ui').addEventListener('click', async () => {
-            if(!isAdmin) return;
-            const editorVal = document.getElementById('json-ui-editor').value;
-            const sts = document.getElementById('ui-save-status');
-            try {
-                const parsed = JSON.parse(editorVal);
-                await setDoc(docRefUI, { jsonStr: JSON.stringify(parsed) });
-                sts.classList.remove('hidden');
-                sts.textContent = "Đã lưu giao diện!";
-                sts.classList.replace('text-red-400', 'text-emerald-400');
-                setTimeout(() => sts.classList.add('hidden'), 2000);
-            } catch (err) {
-                sts.classList.remove('hidden');
-                sts.textContent = "Lỗi JSON. Kiểm tra lại cú pháp!";
-                sts.classList.replace('text-emerald-400', 'text-red-400');
-            }
-        });
-
-        document.getElementById('btn-edit-links').addEventListener('click', () => { modalAdmin.classList.remove('hidden'); document.querySelectorAll('.admin-tab')[1].click(); });
-        document.getElementById('btn-edit-contacts').addEventListener('click', () => { modalAdmin.classList.remove('hidden'); document.querySelectorAll('.admin-tab')[1].click(); });
-        btnAdminDash.addEventListener('click', () => { modalAdmin.classList.remove('hidden'); document.querySelectorAll('.admin-tab')[0].click(); });
-
-        // ================= RENDER UI TỪ JSON =================
+        // Hàm render UI cứng cáp, luôn được gọi ngay khi trang vừa tải xong html
         function renderUIConfig() {
             const linkBox = document.getElementById('ui-links-container');
-            linkBox.innerHTML = '';
-            (uiConfig.links || []).forEach(l => {
-                linkBox.innerHTML += `
-                    <a href="${l.url}" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2.5 rounded-xl bg-slate-900/50 border border-slate-700 hover:bg-slate-700 hover:border-blue-500/50 hover:-translate-y-0.5 transition-all group">
-                        <div class="bg-slate-800 p-2 rounded-lg text-slate-400 shadow-sm group-hover:text-blue-400 group-hover:shadow transition-all">
-                            <i data-lucide="${l.icon}" class="w-4 h-4"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-300 group-hover:text-blue-400 leading-tight">${l.title}</span>
-                    </a>
-                `;
-            });
+            if(linkBox) {
+                linkBox.innerHTML = '';
+                (uiConfig.links || []).forEach(l => {
+                    linkBox.innerHTML += `
+                        <a href="${l.url}" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2.5 rounded-xl bg-slate-900/50 border border-slate-700 hover:bg-slate-700 hover:border-blue-500/50 hover:-translate-y-0.5 transition-all group">
+                            <div class="bg-slate-800 p-2 rounded-lg text-slate-400 shadow-sm group-hover:text-blue-400 group-hover:shadow transition-all">
+                                <i data-lucide="${l.icon}" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-[11px] font-semibold text-slate-300 group-hover:text-blue-400 leading-tight">${l.title}</span>
+                        </a>
+                    `;
+                });
+            }
 
             const ctcBox = document.getElementById('ui-contacts-container');
-            ctcBox.innerHTML = '';
-            (uiConfig.contacts || []).forEach(c => {
-                let iconHTML = `<i data-lucide="${c.icon}" class="w-4 h-4"></i>`;
-                if(c.icon === 'facebook') {
-                    iconHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z"/></svg>`;
-                }
-                
-                ctcBox.innerHTML += `
-                    <a href="${c.url}" target="_blank" class="flex items-center gap-3 p-2.5 rounded-lg border border-slate-700 bg-slate-900/50 hover:bg-slate-700 ${c.borderClass} hover:shadow-sm transition-all group">
-                        <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center ${c.colorClass} ${c.bgClass} transition-colors group-hover:text-white">
-                            ${iconHTML}
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-0.5">${c.title}</p>
-                            <p class="font-bold text-slate-200 text-[13px] leading-none">${c.detail}</p>
-                        </div>
-                    </a>
-                `;
-            });
-            if(typeof lucide !== 'undefined') lucide.createIcons();
+            if(ctcBox) {
+                ctcBox.innerHTML = '';
+                (uiConfig.contacts || []).forEach(c => {
+                    let iconHTML = `<i data-lucide="${c.icon}" class="w-4 h-4"></i>`;
+                    if(c.icon === 'facebook') {
+                        iconHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z"/></svg>`;
+                    }
+                    ctcBox.innerHTML += `
+                        <a href="${c.url}" target="_blank" class="flex items-center gap-3 p-2.5 rounded-lg border border-slate-700 bg-slate-900/50 hover:bg-slate-700 ${c.borderClass} hover:shadow-sm transition-all group">
+                            <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center ${c.colorClass} ${c.bgClass} transition-colors group-hover:text-white">
+                                ${iconHTML}
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-0.5">${c.title}</p>
+                                <p class="font-bold text-slate-200 text-[13px] leading-none">${c.detail}</p>
+                            </div>
+                        </a>
+                    `;
+                });
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function hideLoading() {
             const ls = document.getElementById('loading-screen');
-            if(ls && !ls.classList.contains('hidden')) {
+            if (ls && !ls.classList.contains('hidden')) {
                 ls.classList.add('opacity-0');
-                setTimeout(() => { ls.classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); }, 500);
+                setTimeout(() => { 
+                    ls.classList.add('hidden'); 
+                    document.getElementById('app-content').classList.remove('hidden'); 
+                }, 500);
             }
         }
 
+        // CHẠY GIAO DIỆN CƠ BẢN TRƯỚC (Bảo vệ UI không bị sập)
+        document.addEventListener('DOMContentLoaded', () => {
+            renderUIConfig();
+            
+            // Xử lý Modal Đóng mở cơ bản (An toàn)
+            document.querySelectorAll('[data-close-modal]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modalId = e.currentTarget.getAttribute('data-close-modal');
+                    document.getElementById(modalId).classList.add('hidden');
+                });
+            });
 
-        // ================= BỘ LỌC THÔNG MINH =================
-        const inputTinh = document.getElementById('input-tinh');
-        const inputCoquan = document.getElementById('input-coquan');
-        const inputXa = document.getElementById('input-xa');
+            const btnLoginTrigger = document.getElementById('btn-login-trigger');
+            if(btnLoginTrigger) {
+                btnLoginTrigger.addEventListener('click', () => {
+                    if(window._firebaseIsAdmin) {
+                        document.getElementById('modal-admin').classList.remove('hidden');
+                        document.getElementById('json-ui-editor').value = JSON.stringify(uiConfig, null, 4);
+                    } else {
+                        document.getElementById('modal-login').classList.remove('hidden');
+                        document.getElementById('login-error').classList.add('hidden');
+                    }
+                });
+            }
 
+            // Tabs Admin
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.admin-tab').forEach(t => {
+                        t.classList.remove('text-blue-400', 'border-blue-500');
+                        t.classList.add('text-slate-400', 'border-transparent');
+                    });
+                    e.currentTarget.classList.remove('text-slate-400', 'border-transparent');
+                    e.currentTarget.classList.add('text-blue-400', 'border-blue-500');
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+                    document.getElementById(e.currentTarget.dataset.target).classList.remove('hidden');
+                });
+            });
+
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Chống kẹt Loading vĩnh viễn (Sẽ chạy sau 4 giây bất kể Firebase có lỗi hay không)
+            setTimeout(() => { hideLoading(); }, 4000);
+        });
+
+        function updateClock() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yyyy = now.getFullYear();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            const el = document.getElementById('current-time');
+            if(el) el.textContent = `${dd}/${mm}/${yyyy} - ${hh}:${min}:${ss}`;
+        }
+        updateClock(); setInterval(updateClock, 1000);
+
+        // ================= KẾT NỐI FIREBASE TRONG KHỐI TRY CATCH AN TOÀN =================
+        try {
+            // CẤU HÌNH FIREBASE CỦA BẠN (Hỗ trợ môi trường Canvas và Prod)
+            let config;
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                config = JSON.parse(__firebase_config);
+            } else {
+                config = {
+                    apiKey: "AIzaSyC-QUv2MgckcmqMbSTfksI0TUQCiTYW_PE",
+                    authDomain: "tra-cuu-co-quan-bhxh.firebaseapp.com",
+                    databaseURL: "https://tra-cuu-co-quan-bhxh-default-rtdb.firebaseio.com",
+                    projectId: "tra-cuu-co-quan-bhxh",
+                    storageBucket: "tra-cuu-co-quan-bhxh.firebasestorage.app",
+                    messagingSenderId: "810791838843",
+                    appId: "1:810791838843:web:401b9788d01255cc8beede",
+                    measurementId: "G-T1JDKMSK26"
+                };
+            }
+
+            const app = initializeApp(config);
+            const analytics = getAnalytics(app);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'visnam-bhxh-app';
+            const docRefData = doc(db, 'artifacts', APP_ID, 'public', 'data', 'mainData', 'default');
+            const docRefUI = doc(db, 'artifacts', APP_ID, 'public', 'data', 'uiConfig', 'default');
+
+            let unsubscribeData = null;
+            let unsubscribeUI = null;
+            window._firebaseIsAdmin = false;
+
+            function updateAdminUIStatus(isAdmin) {
+                window._firebaseIsAdmin = isAdmin;
+                const dash = document.getElementById('btn-admin-dashboard');
+                const eL = document.getElementById('btn-edit-links');
+                const eC = document.getElementById('btn-edit-contacts');
+                const dot = document.getElementById('connection-status');
+                
+                if(isAdmin) {
+                    if(dash) dash.classList.remove('hidden');
+                    if(eL) eL.classList.remove('hidden');
+                    if(eC) eC.classList.remove('hidden');
+                    if(dot) { dot.classList.replace('bg-slate-500', 'bg-emerald-500'); dot.title = "Đã kết nối Quản trị"; }
+                } else {
+                    if(dash) dash.classList.add('hidden');
+                    if(eL) eL.classList.add('hidden');
+                    if(eC) eC.classList.add('hidden');
+                    if(dot) { dot.classList.replace('bg-slate-500', 'bg-blue-400'); dot.title = "Đã kết nối Máy khách"; }
+                }
+            }
+
+            const initFirebaseApp = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        // NẾU TÊN MIỀN CỦA BẠN CHƯA THÊM VÀO FIREBASE, HÀM NÀY SẼ THROW LỖI
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Lỗi xác thực Firebase (Chưa thêm tên miền web vào mục Authorized domains trên Firebase?):", error);
+                    document.getElementById('firebase-error-alert').classList.remove('hidden');
+                    const dot = document.getElementById('connection-status');
+                    if(dot) dot.classList.replace('bg-slate-500', 'bg-red-500');
+                    hideLoading();
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (!user) return; // Bắt buộc bảo vệ truy vấn: Chỉ thực hiện khi đã có user (kể cả ẩn danh)
+                    
+                    updateAdminUIStatus(!user.isAnonymous);
+                    if(!unsubscribeData) {
+                        unsubscribeData = onSnapshot(docRefData, (docSnap) => {
+                                hideLoading();
+                                if (docSnap.exists() && docSnap.data().dataString) {
+                                    try { dbData = JSON.parse(docSnap.data().dataString); } catch(e) {}
+                                }
+                                initFilters();
+                                document.getElementById('empty-title').textContent = dbData.length > 0 ? "Nhập tiêu chí để tìm kiếm" : "Chưa có dữ liệu nào trên hệ thống";
+                            }, (err) => {
+                                console.error("Lỗi đọc Data Firebase:", err);
+                                document.getElementById('firebase-error-alert').classList.remove('hidden');
+                                hideLoading();
+                            });
+                        }
+                        if(!unsubscribeUI) {
+                            unsubscribeUI = onSnapshot(docRefUI, (docSnap) => {
+                                if (docSnap.exists() && docSnap.data().jsonStr) {
+                                    try { uiConfig = JSON.parse(docSnap.data().jsonStr); } catch(e) {}
+                                }
+                                renderUIConfig();
+                            });
+                        }
+                });
+            };
+            
+            initFirebaseApp();
+
+            // ================= LOGIC XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT =================
+            const formLogin = document.getElementById('form-login');
+            if(formLogin) {
+                formLogin.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const em = document.getElementById('login-email').value;
+                    const pw = document.getElementById('login-password').value;
+                    try {
+                        await signInWithEmailAndPassword(auth, em, pw);
+                        document.getElementById('modal-login').classList.add('hidden');
+                        document.getElementById('modal-admin').classList.remove('hidden');
+                        document.getElementById('json-ui-editor').value = JSON.stringify(uiConfig, null, 4);
+                    } catch (err) {
+                        document.getElementById('login-error').classList.remove('hidden');
+                    }
+                });
+            }
+
+            const btnLogout = document.getElementById('btn-logout');
+            if(btnLogout) {
+                btnLogout.addEventListener('click', async () => {
+                    await signOut(auth);
+                    document.getElementById('modal-admin').classList.add('hidden');
+                });
+            }
+
+            // ================= LOGIC UPLOAD EXCEL (SHEETJS) =================
+            let parsedDataCache = null;
+            const fileInput = document.getElementById('excel-file');
+            const btnSync = document.getElementById('btn-sync-data');
+            
+            if(fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if(!file) return;
+                    document.getElementById('file-name-display').textContent = file.name;
+                    btnSync.disabled = true;
+                    
+                    const uploadStatus = document.getElementById('upload-status');
+                    uploadStatus.textContent = "Đang đọc file...";
+                    uploadStatus.className = "text-center text-xs mt-3 font-medium text-blue-400";
+
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        try {
+                            const data = evt.target.result;
+                            const wb = XLSX.read(data, {type: 'binary'});
+                            const ws = wb.Sheets[wb.SheetNames[0]];
+                            const rawJson = XLSX.utils.sheet_to_json(ws, { defval: "" });
+                            
+                            parsedDataCache = rawJson.map(row => ({
+                                maTinh: String(row['Mã tỉnh'] || row['Mã Tỉnh'] || row['maTinh'] || ''),
+                                tenTinh: String(row['Tên tỉnh'] || row['Tên Tỉnh'] || row['tenTinh'] || ''),
+                                maCoQuan: String(row['Mã cơ quan BHXH'] || row['Mã CQ BHXH'] || row['maCoQuan'] || ''),
+                                tenCoQuan: String(row['Tên cơ quan BHXH'] || row['Tên Cơ quan BHXH'] || row['Tên cơ quan'] || ''),
+                                maXa: String(row['Mã xã'] || row['Mã Xã'] || row['maXa'] || ''),
+                                tenXa: String(row['Tên xã quản lý'] || row['Tên Xã quản lý'] || row['tenXa'] || '')
+                            })).filter(r => r.tenTinh || r.tenCoQuan);
+
+                            btnSync.disabled = false;
+                            uploadStatus.textContent = `Đọc thành công ${parsedDataCache.length} dòng. Nhấn "Đồng bộ" để lưu.`;
+                            uploadStatus.className = "text-center text-xs mt-3 font-medium text-emerald-400";
+                        } catch (err) {
+                            uploadStatus.textContent = "Lỗi đọc file. Vui lòng kiểm tra định dạng.";
+                            uploadStatus.className = "text-center text-xs mt-3 font-medium text-red-400";
+                        }
+                    };
+                    reader.readAsBinaryString(file);
+                });
+            }
+
+            if(btnSync) {
+                btnSync.addEventListener('click', async () => {
+                    if(!window._firebaseIsAdmin || !parsedDataCache) return;
+                    btnSync.disabled = true;
+                    const uploadStatus = document.getElementById('upload-status');
+                    uploadStatus.textContent = "Đang đẩy dữ liệu lên Cloud...";
+                    uploadStatus.className = "text-center text-xs mt-3 font-medium text-blue-400";
+
+                    try {
+                        const dataStr = JSON.stringify(parsedDataCache);
+                        await setDoc(docRefData, { dataString: dataStr, updatedAt: new Date() });
+                        
+                        uploadStatus.textContent = "Đồng bộ Cloud thành công!";
+                        uploadStatus.className = "text-center text-xs mt-3 font-medium text-emerald-400";
+                        setTimeout(() => { document.getElementById('modal-admin').classList.add('hidden'); uploadStatus.textContent = ''; }, 1500);
+                    } catch(e) {
+                        uploadStatus.textContent = "Lỗi kết nối Firebase (Quyền truy cập bị từ chối).";
+                        uploadStatus.className = "text-center text-xs mt-3 font-medium text-red-400";
+                        btnSync.disabled = false;
+                    }
+                });
+            }
+
+            // ================= LOGIC LƯU UI =================
+            const btnSaveUI = document.getElementById('btn-save-ui');
+            if(btnSaveUI) {
+                btnSaveUI.addEventListener('click', async () => {
+                    if(!window._firebaseIsAdmin) return;
+                    const sts = document.getElementById('ui-save-status');
+                    try {
+                        const parsed = JSON.parse(document.getElementById('json-ui-editor').value);
+                        await setDoc(docRefUI, { jsonStr: JSON.stringify(parsed) });
+                        sts.classList.remove('hidden');
+                        sts.textContent = "Đã lưu giao diện!";
+                        sts.classList.replace('text-red-400', 'text-emerald-400');
+                        setTimeout(() => sts.classList.add('hidden'), 2000);
+                    } catch (err) {
+                        sts.classList.remove('hidden');
+                        sts.textContent = "Lỗi JSON. Kiểm tra lại cú pháp!";
+                        sts.classList.replace('text-emerald-400', 'text-red-400');
+                    }
+                });
+            }
+
+            document.getElementById('btn-edit-links').addEventListener('click', () => { document.getElementById('modal-admin').classList.remove('hidden'); document.querySelectorAll('.admin-tab')[1].click(); });
+            document.getElementById('btn-edit-contacts').addEventListener('click', () => { document.getElementById('modal-admin').classList.remove('hidden'); document.querySelectorAll('.admin-tab')[1].click(); });
+            const btnAdminDash = document.getElementById('btn-admin-dashboard');
+            if(btnAdminDash) btnAdminDash.addEventListener('click', () => { document.getElementById('modal-admin').classList.remove('hidden'); document.querySelectorAll('.admin-tab')[0].click(); });
+
+        } catch (fatalError) {
+            console.error("LỖI NGHIÊM TRỌNG KHI TẢI FIREBASE:", fatalError);
+            hideLoading();
+            const alertBox = document.getElementById('firebase-error-alert');
+            if(alertBox) {
+                alertBox.classList.remove('hidden');
+                alertBox.innerHTML = "⚠️ Thư viện dữ liệu đám mây không thể khởi tạo. Vui lòng F5 tải lại trang.";
+            }
+        }
+
+        // ================= LOGIC BỘ LỌC TÌM KIẾM (ĐỘC LẬP) =================
         function setupAutocomplete(inputId, listId, getDataListCb) {
             const input = document.getElementById(inputId);
             const list = document.getElementById(listId);
+            if(!input || !list) return;
             const container = input.closest('div.relative'); 
             const icon = input.nextElementSibling; 
 
@@ -724,89 +736,83 @@
         function initFilters() {
             setupAutocomplete('input-tinh', 'list-tinh', () => [...new Set(dbData.map(i => i.tenTinh))].filter(Boolean));
             setupAutocomplete('input-coquan', 'list-coquan', () => {
-                const t = inputTinh.value.trim().toLowerCase();
+                const t = document.getElementById('input-tinh').value.trim().toLowerCase();
                 return [...new Set(dbData.filter(i => !t || (i.tenTinh||'').toLowerCase().includes(t)).map(i => i.tenCoQuan))].filter(Boolean);
             });
             setupAutocomplete('input-xa', 'list-xa', () => {
-                const t = inputTinh.value.trim().toLowerCase();
-                const cq = inputCoquan.value.trim().toLowerCase();
+                const t = document.getElementById('input-tinh').value.trim().toLowerCase();
+                const cq = document.getElementById('input-coquan').value.trim().toLowerCase();
                 return [...new Set(dbData.filter(i => {
                     return (!t || (i.tenTinh||'').toLowerCase().includes(t)) && (!cq || (i.tenCoQuan||'').toLowerCase().includes(cq));
                 }).map(i => i.tenXa))].filter(Boolean);
             });
         }
 
-
-        // ================= XỬ LÝ TÌM KIẾM =================
         const searchForm = document.getElementById('search-form');
-        const resultsBody = document.getElementById('results-body');
-        
-        searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            document.getElementById('search-icon').classList.add('hidden');
-            document.getElementById('loading-spinner').classList.remove('hidden');
-            document.getElementById('table-loading').classList.remove('hidden');
+        if(searchForm) {
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                document.getElementById('search-icon').classList.add('hidden');
+                document.getElementById('loading-spinner').classList.remove('hidden');
+                document.getElementById('table-loading').classList.remove('hidden');
 
-            const valTinh = inputTinh.value.toLowerCase().trim();
-            const valCoquan = inputCoquan.value.toLowerCase().trim();
-            const valXa = inputXa.value.toLowerCase().trim();
+                const valTinh = document.getElementById('input-tinh').value.toLowerCase().trim();
+                const valCoquan = document.getElementById('input-coquan').value.toLowerCase().trim();
+                const valXa = document.getElementById('input-xa').value.toLowerCase().trim();
 
-            setTimeout(() => {
-                const found = dbData.filter(item => {
-                    const matchT = !valTinh || (item.tenTinh||'').toLowerCase().includes(valTinh);
-                    const matchC = !valCoquan || (item.tenCoQuan||'').toLowerCase().includes(valCoquan);
-                    const matchX = !valXa || (item.tenXa||'').toLowerCase().includes(valXa);
-                    return matchT && matchC && matchX;
-                });
-
-                resultsBody.innerHTML = '';
-                const emptyState = document.getElementById('empty-state');
-                const tb = document.getElementById('results-table');
-                const count = document.getElementById('result-count');
-
-                if (found.length === 0) {
-                    emptyState.classList.remove('hidden');
-                    document.getElementById('empty-title').textContent = "Không tìm thấy kết quả phù hợp";
-                    tb.classList.add('hidden');
-                    count.classList.add('hidden');
-                } else {
-                    emptyState.classList.add('hidden');
-                    tb.classList.remove('hidden');
-                    count.textContent = `${found.length} kết quả`;
-                    count.classList.remove('hidden');
-
-                    const maxDisplay = 500; 
-                    const displayData = found.slice(0, maxDisplay);
-
-                    let htmlStr = '';
-                    displayData.forEach((row, index) => {
-                        htmlStr += `
-                            <tr class="hover:bg-slate-700/60 hover:shadow-[inset_4px_0_0_0_#3b82f6] cursor-default border-b border-slate-700/50 last:border-0">
-                                <td class="py-3 px-4 text-slate-400">${index + 1}</td>
-                                <td class="py-3 px-4 text-slate-400">${row.maTinh || ''}</td>
-                                <td class="py-3 px-4 font-semibold text-slate-200">${row.tenTinh || ''}</td>
-                                <td class="py-3 px-4 text-slate-400">${row.maCoQuan || ''}</td>
-                                <td class="py-3 px-4 font-bold text-blue-400">${row.tenCoQuan || ''}</td>
-                                <td class="py-3 px-4 text-slate-400">${row.maXa || ''}</td>
-                                <td class="py-3 px-4 text-slate-300">${row.tenXa || ''}</td>
-                            </tr>
-                        `;
+                setTimeout(() => {
+                    const found = dbData.filter(item => {
+                        const matchT = !valTinh || (item.tenTinh||'').toLowerCase().includes(valTinh);
+                        const matchC = !valCoquan || (item.tenCoQuan||'').toLowerCase().includes(valCoquan);
+                        const matchX = !valXa || (item.tenXa||'').toLowerCase().includes(valXa);
+                        return matchT && matchC && matchX;
                     });
-                    if(found.length > maxDisplay) {
-                        htmlStr += `<tr><td colspan="7" class="py-3 text-center text-slate-500 italic">Còn ${found.length - maxDisplay} kết quả nữa, vui lòng lọc chi tiết hơn...</td></tr>`;
+
+                    const resultsBody = document.getElementById('results-body');
+                    resultsBody.innerHTML = '';
+                    const emptyState = document.getElementById('empty-state');
+                    const tb = document.getElementById('results-table');
+                    const count = document.getElementById('result-count');
+
+                    if (found.length === 0) {
+                        emptyState.classList.remove('hidden');
+                        document.getElementById('empty-title').textContent = "Không tìm thấy kết quả phù hợp";
+                        tb.classList.add('hidden');
+                        count.classList.add('hidden');
+                    } else {
+                        emptyState.classList.add('hidden');
+                        tb.classList.remove('hidden');
+                        count.textContent = `${found.length} kết quả`;
+                        count.classList.remove('hidden');
+
+                        const maxDisplay = 500; 
+                        const displayData = found.slice(0, maxDisplay);
+                        let htmlStr = '';
+                        displayData.forEach((row, index) => {
+                            htmlStr += `
+                                <tr class="hover:bg-slate-700/60 hover:shadow-[inset_4px_0_0_0_#3b82f6] cursor-default border-b border-slate-700/50 last:border-0">
+                                    <td class="py-3 px-4 text-slate-400">${index + 1}</td>
+                                    <td class="py-3 px-4 text-slate-400">${row.maTinh || ''}</td>
+                                    <td class="py-3 px-4 font-semibold text-slate-200">${row.tenTinh || ''}</td>
+                                    <td class="py-3 px-4 text-slate-400">${row.maCoQuan || ''}</td>
+                                    <td class="py-3 px-4 font-bold text-blue-400">${row.tenCoQuan || ''}</td>
+                                    <td class="py-3 px-4 text-slate-400">${row.maXa || ''}</td>
+                                    <td class="py-3 px-4 text-slate-300">${row.tenXa || ''}</td>
+                                </tr>
+                            `;
+                        });
+                        if(found.length > maxDisplay) {
+                            htmlStr += `<tr><td colspan="7" class="py-3 text-center text-slate-500 italic">Còn ${found.length - maxDisplay} kết quả nữa, vui lòng lọc chi tiết hơn...</td></tr>`;
+                        }
+                        resultsBody.innerHTML = htmlStr;
                     }
-                    resultsBody.innerHTML = htmlStr;
-                }
 
-                document.getElementById('search-icon').classList.remove('hidden');
-                document.getElementById('loading-spinner').classList.add('hidden');
-                document.getElementById('table-loading').classList.add('hidden');
-            }, 300);
-        });
-
-        initApp();
-
+                    document.getElementById('search-icon').classList.remove('hidden');
+                    document.getElementById('loading-spinner').classList.add('hidden');
+                    document.getElementById('table-loading').classList.add('hidden');
+                }, 300);
+            });
+        }
     </script>
 </body>
 </html>
