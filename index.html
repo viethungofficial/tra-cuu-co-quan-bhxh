@@ -58,7 +58,7 @@
             background-color: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 0.75rem; /* Giảm bo góc */
+            border-radius: 0.75rem; 
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -75,7 +75,7 @@
             align-items: center;
             gap: 0.4rem;
             font-weight: 700;
-            font-size: 0.75rem; /* Chữ nhỏ lại */
+            font-size: 0.75rem; 
             color: #f8fafc;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -254,7 +254,8 @@
             </div>
 
             <!-- Liên Hệ Hỗ Trợ -->
-            <div class="smooth-panel mt-auto flex-shrink-0">
+            <!-- ĐÃ XÓA mt-auto: Box này giờ sẽ nằm sát với các box trên, khoảng cách cố định (gap-3) -->
+            <div class="smooth-panel flex-shrink-0">
                 <div class="panel-header flex-shrink-0">
                     <i class="fas fa-headset text-sky-500"></i> Liên Hệ
                 </div>
@@ -464,9 +465,9 @@
         if(isFirebaseActive) {
             onAuthStateChanged(auth, (user) => {
                 if (user && !user.isAnonymous && user.email) {
-                    isAdmin = true; 
+                    isAdmin = true; // Là user có email thật
                 } else {
-                    isAdmin = false; 
+                    isAdmin = false; // Là user ẩn danh (người xem)
                 }
                 updateAdminUI();
             });
@@ -478,12 +479,14 @@
                 return;
             }
             try {
+                // Ưu tiên token của môi trường, không có thì login ẩn danh cho khách đọc dữ liệu
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else if (!auth.currentUser) {
                     await signInAnonymously(auth);
                 }
 
+                // Lắng nghe dữ liệu
                 const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
                 onSnapshot(dataCollectionRef, (snapshot) => {
                     let allLoadedData = [];
@@ -507,7 +510,7 @@
         
         initFirebaseAuthAndData();
 
-        // Xử lý Upload Excel (Chỉ Admin)
+        // Xử lý Upload Excel (Chỉ thực hiện được khi Admin)
         document.getElementById('excelUpload').addEventListener('change', async function(e) {
             if (!isAdmin) return;
             const file = e.target.files[0];
