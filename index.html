@@ -123,17 +123,15 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Chống vỡ Layout, Responsive cho mọi thiết bị */
+        /* Chống vỡ Layout, Responsive cho di động */
         @media (max-width: 1024px) {
-            body { height: auto !important; min-height: 100vh; overflow: auto !important; }
             .main-layout { display: flex !important; flex-direction: column !important; min-height: auto !important; overflow: visible !important; }
             .sidebar-col { width: 100% !important; height: auto !important; overflow: visible !important; }
-            .content-col { width: 100% !important; height: 600px !important; flex: none !important; }
             #snow-container { height: 100% !important; position: fixed; }
         }
     </style>
 </head>
-<body class="text-[11px] flex flex-col h-screen overflow-hidden relative">
+<body class="text-[11px] flex flex-col min-h-screen overflow-x-hidden relative">
 
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
@@ -197,11 +195,11 @@
         </div>
     </header>
 
-    <!-- Main Layout: Lưới chuẩn, bảo vệ nội dung không bị mất -->
-    <main class="main-layout flex-1 w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0">
+    <!-- Main Layout: Cấu trúc KHÓA CHIỀU CAO - Hai cột luôn bằng nhau -->
+    <main class="main-layout w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0 mb-6">
         
-        <!-- CỘT TRÁI: SIDEBAR -->
-        <aside class="sidebar-col flex flex-col gap-3 lg:h-full lg:overflow-y-auto hide-scrollbar pb-1">
+        <!-- CỘT TRÁI: SIDEBAR (Khối dẫn dắt chiều cao cho layout) -->
+        <aside class="sidebar-col flex flex-col gap-3">
             
             <!-- Bộ Lọc Tìm Kiếm -->
             <div class="smooth-panel flex-shrink-0">
@@ -254,7 +252,6 @@
             </div>
 
             <!-- Liên Hệ Hỗ Trợ -->
-            <!-- ĐÃ XÓA mt-auto: Box này giờ sẽ nằm sát với các box trên, khoảng cách cố định (gap-3) -->
             <div class="smooth-panel flex-shrink-0">
                 <div class="panel-header flex-shrink-0">
                     <i class="fas fa-headset text-sky-500"></i> Liên Hệ
@@ -289,49 +286,52 @@
             </div>
         </aside>
 
-        <!-- CỘT PHẢI: BẢNG KẾT QUẢ TỐI ĐA -->
-        <section class="content-col smooth-panel flex-1 flex flex-col min-h-0">
-            <div class="panel-header justify-between flex-shrink-0">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-table text-sky-500"></i> BẢNG TRÍCH XUẤT DỮ LIỆU
+        <!-- CỘT PHẢI: BẢNG KẾT QUẢ ĐỒNG BỘ CHIỀU CAO VỚI CỘT TRÁI -->
+        <section class="content-col smooth-panel min-h-[600px] lg:min-h-0 relative flex flex-col">
+            <!-- Box tuyệt đối ở Desktop giúp Bảng Không bao giờ vượt quá chiều cao cột trái -->
+            <div class="flex flex-col flex-1 w-full lg:absolute lg:inset-0">
+                <div class="panel-header justify-between flex-shrink-0">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-table text-sky-500"></i> BẢNG TRÍCH XUẤT DỮ LIỆU
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <div id="upload-message" class="hidden text-sky-400 text-[9px] font-bold px-2 py-1 rounded"></div>
+                        
+                        <!-- Nút Upload ẩn đi, chỉ hiện khi Firebase Auth Admin -->
+                        <div id="upload-section" class="hidden">
+                            <input type="file" id="excelUpload" accept=".xlsx, .xls" class="hidden" />
+                            <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-[9px] font-bold transition-colors flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                <i class="fas fa-cloud-upload-alt"></i> TẢI EXCEL
+                            </label>
+                        </div>
+
+                        <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
+                        </span>
+                    </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <div id="upload-message" class="hidden text-sky-400 text-[9px] font-bold px-2 py-1 rounded"></div>
-                    
-                    <!-- Nút Upload ẩn đi, chỉ hiện khi Firebase Auth Admin -->
-                    <div id="upload-section" class="hidden">
-                        <input type="file" id="excelUpload" accept=".xlsx, .xls" class="hidden" />
-                        <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-[9px] font-bold transition-colors flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                            <i class="fas fa-cloud-upload-alt"></i> TẢI EXCEL
-                        </label>
+                <!-- Vùng Thanh Cuộn Bảng Tự Động -->
+                <div class="flex-1 relative w-full min-h-0 bg-[#0b1120]/50">
+                    <div class="absolute inset-0 custom-scroll overflow-auto">
+                        <table class="w-full text-left border-collapse min-w-[650px]">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest w-10 text-center text-slate-400">STT</th>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã Tỉnh</th>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Tỉnh</th>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã CQ</th>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Cơ Quan</th>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã Xã</th>
+                                    <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Phường/Xã</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- JS Render Here -->
+                            </tbody>
+                        </table>
                     </div>
-
-                    <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
-                        <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Vùng Thanh Cuộn Bảng - Box Absolute bám dính -->
-            <div class="flex-1 relative w-full min-h-0 bg-[#0b1120]/50">
-                <div class="absolute inset-0 custom-scroll overflow-auto">
-                    <table class="w-full text-left border-collapse min-w-[650px]">
-                        <thead>
-                            <tr>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest w-10 text-center text-slate-400">STT</th>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã Tỉnh</th>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Tỉnh</th>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã CQ</th>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Cơ Quan</th>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Mã Xã</th>
-                                <th class="px-3 py-2.5 font-bold text-[9px] uppercase tracking-widest text-slate-400">Tên Phường/Xã</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <!-- JS Render Here -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </section>
