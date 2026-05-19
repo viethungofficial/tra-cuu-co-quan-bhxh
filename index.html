@@ -160,10 +160,9 @@
             <!-- Trái: Logo + Tiêu đề -->
             <div class="flex items-center gap-4">
                 <div class="p-1 bg-white/5 rounded-lg flex items-center justify-center border border-white/10 shadow-inner">
-                    <!-- Logo Visnam Mới -->
                     <img src="logo-visnam.png" alt="Visnam" class="h-8 object-contain" onerror="this.style.display='none'">
                 </div>
-                <!-- Logo BHXH Mới -->
+                <!-- Logo BHXH Hệ thống -->
                 <img src="logo-bhxh.png" alt="System Logo" class="h-9 w-auto object-contain hidden sm:block opacity-90" onerror="this.style.display='none'">
                 
                 <div class="h-6 w-px bg-slate-700/50 hidden sm:block"></div>
@@ -193,7 +192,7 @@
         </div>
     </header>
 
-    <!-- Main Layout: Cấu trúc CSS Grid Khóa Chiều Cao -->
+    <!-- Main Layout -->
     <main class="w-full max-w-[1600px] mx-auto p-3 sm:p-4 gap-4 grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] relative z-10 items-stretch">
         
         <!-- CỘT TRÁI: SIDEBAR -->
@@ -250,12 +249,11 @@
             </div>
 
             <!-- Liên Hệ Hỗ Trợ -->
-            <div class="smooth-panel flex-1 flex flex-col">
+            <div class="smooth-panel flex-1 flex flex-col justify-end">
                 <div class="panel-header flex-shrink-0">
                     <i class="fas fa-headset text-sky-500"></i> Liên Hệ Hỗ Trợ
                 </div>
                 <div class="p-3.5 flex-1 flex flex-col justify-center bg-slate-900/30">
-                    <!-- Dòng 1: Hotline, Website -->
                     <div class="grid grid-cols-2 gap-2.5 mb-2.5">
                         <a href="tel:19006134" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-rose-500/30 transition-all group">
                             <i class="fas fa-phone-alt text-rose-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
@@ -266,7 +264,6 @@
                             <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Website</span>
                         </a>
                     </div>
-                    <!-- Dòng 2: Zalo, Fanpage -->
                     <div class="grid grid-cols-2 gap-2.5">
                         <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-blue-500/30 transition-all group">
                             <i class="fas fa-comment-dots text-blue-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
@@ -308,9 +305,9 @@
                 </div>
             </div>
             
-            <!-- Vùng Thanh Cuộn Bảng - Box Absolute bám dính, không tự kéo dãn -->
+            <!-- Vùng Thanh Cuộn Bảng -->
             <div class="flex-1 relative w-full min-h-0 bg-[#0b1120]/50">
-                <div class="absolute inset-0 custom-scroll overflow-auto">
+                <div class="absolute inset-0 overflow-auto">
                     <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead>
                             <tr>
@@ -379,13 +376,13 @@
                 flake.className = 'snowflake';
                 
                 // Randomize properties
-                const size = Math.random() * 3 + 2; // 2px - 5px
+                const size = Math.random() * 3 + 2; 
                 flake.style.width = size + 'px';
                 flake.style.height = size + 'px';
                 flake.style.left = Math.random() * 100 + 'vw';
                 flake.style.opacity = Math.random() * 0.4 + 0.1; 
                 flake.style.animationDuration = Math.random() * 15 + 10 + 's'; 
-                flake.style.animationDelay = Math.random() * -20 + 's'; // Để tuyết rơi ngay từ đầu
+                flake.style.animationDelay = Math.random() * -20 + 's'; 
                 
                 snowContainer.appendChild(flake);
             }
@@ -456,54 +453,56 @@
             }, 300);
         }
 
-        // Lắng nghe trạng thái đăng nhập từ Firebase Auth
+        // Đảm bảo chỉ đăng ký snapshot listener 1 lần
+        let isDataInitialized = false;
+
         if(isFirebaseActive) {
-            onAuthStateChanged(auth, (user) => {
-                if (user && !user.isAnonymous && user.email) {
-                    isAdmin = true; // Là user có email thật
-                } else {
-                    isAdmin = false; // Là user ẩn danh (người xem)
-                }
-                updateAdminUI();
-            });
-        }
-
-        async function initFirebaseAuthAndData() {
-            if(!isFirebaseActive) {
-                loadingFinished = true;
-                return;
-            }
-            try {
-                // Ưu tiên token của môi trường, không có thì login ẩn danh cho khách đọc dữ liệu
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else if (!auth.currentUser) {
-                    await signInAnonymously(auth);
-                }
-
-                // Lắng nghe dữ liệu
-                const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
-                onSnapshot(dataCollectionRef, (snapshot) => {
-                    let allLoadedData = [];
-                    snapshot.forEach(doc => {
-                        if(doc.id.startsWith('chunk_')) {
-                            try {
-                                const chunkArray = JSON.parse(doc.data().payload);
-                                allLoadedData = allLoadedData.concat(chunkArray);
-                            } catch(e) {}
-                        }
-                    });
-
-                    if(allLoadedData.length > 0) {
-                        currentData = allLoadedData;
-                        refreshUI();
+            onAuthStateChanged(auth, async (user) => {
+                // Phân quyền Admin / Khách
+                if (user) {
+                    if (!user.isAnonymous && user.email) {
+                        isAdmin = true;
+                    } else {
+                        isAdmin = false;
                     }
-                    loadingFinished = true;
-                }, (error) => { loadingFinished = true; });
-            } catch (error) { loadingFinished = true; }
+                } else {
+                    isAdmin = false;
+                    try {
+                        await signInAnonymously(auth);
+                        return; // Nó sẽ kích hoạt lại onAuthStateChanged
+                    } catch(e) {
+                        console.warn("Chưa bật Anonymous Auth trên Firebase.");
+                    }
+                }
+                
+                updateAdminUI();
+
+                // Nạp dữ liệu 1 lần duy nhất cho mọi thay đổi session sau đó
+                if (!isDataInitialized) {
+                    isDataInitialized = true;
+                    const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
+                    onSnapshot(dataCollectionRef, (snapshot) => {
+                        let allLoadedData = [];
+                        snapshot.forEach(doc => {
+                            if(doc.id.startsWith('chunk_')) {
+                                try {
+                                    const chunkArray = JSON.parse(doc.data().payload);
+                                    allLoadedData = allLoadedData.concat(chunkArray);
+                                } catch(e) {}
+                            }
+                        });
+
+                        if(allLoadedData.length > 0) {
+                            currentData = allLoadedData;
+                            refreshUI();
+                        }
+                        loadingFinished = true;
+                    }, (error) => { loadingFinished = true; });
+                }
+            });
+        } else {
+            loadingFinished = true;
         }
-        
-        initFirebaseAuthAndData();
 
         // Xử lý Upload Excel (Chỉ thực hiện được khi Admin)
         document.getElementById('excelUpload').addEventListener('change', async function(e) {
