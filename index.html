@@ -131,7 +131,7 @@
         }
     </style>
 </head>
-<body class="text-[11px] flex flex-col min-h-screen overflow-x-hidden relative">
+<body class="text-[11px] flex flex-col h-screen overflow-hidden relative">
 
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
@@ -220,8 +220,32 @@
                         </select>
                     </div>
                     <div class="relative">
-                        <input type="text" id="input-search" placeholder="Tên/mã xã tìm kiếm..." class="dark-input w-full pl-7 pr-2 py-1.5 rounded-md text-[11px] font-medium" />
+                        <input type="text" id="input-search" placeholder="Tên/mã xã tìm kiếm (không dấu)..." class="dark-input w-full pl-7 pr-2 py-1.5 rounded-md text-[11px] font-medium" />
                         <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tìm Kiếm Theo Mã Số Thuế (MST) -->
+            <div class="smooth-panel flex-shrink-0">
+                <div class="panel-header">
+                    <i class="fas fa-file-invoice-dollar text-sky-500"></i> TRA CỨU THEO MST
+                </div>
+                <div class="p-3 space-y-2.5 bg-slate-900/20">
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <i class="fas fa-barcode absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+                            <input type="text" id="input-mst" placeholder="Nhập mã số thuế..." class="dark-input w-full pl-7 pr-2 py-1.5 rounded-md text-[11px] font-medium" />
+                        </div>
+                        <button id="btn-search-mst" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-3 py-1.5 rounded-md text-[10px] transition-colors flex items-center gap-1 shadow-[0_0_8px_rgba(14,165,233,0.2)]">
+                            <i class="fas fa-search"></i> Tìm
+                        </button>
+                    </div>
+                    <!-- Hộp kết quả tra cứu MST -->
+                    <div id="mst-result-box" class="hidden text-[10px] p-2 bg-slate-950/70 border border-white/5 rounded-lg space-y-1.5">
+                        <p class="font-bold text-sky-400 leading-tight" id="mst-company-name"></p>
+                        <p class="text-slate-400 leading-tight" id="mst-company-address"></p>
+                        <p class="text-emerald-400 font-semibold" id="mst-extracted-info"></p>
                     </div>
                 </div>
             </div>
@@ -280,7 +304,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="py-2.5 text-center bg-slate-900 border-t border-white/5">
+                <div class="py-2.5 text-center bg-slate-900 border-t border-white/5 flex-shrink-0">
                     <p class="text-[8px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year"></span> VISNAM JSC.</p>
                 </div>
             </div>
@@ -306,9 +330,9 @@
                             </label>
                         </div>
 
-                        <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
-                            <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
-                        </span>
+                    <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
+                        <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
+                    </span>
                     </div>
                 </div>
                 
@@ -496,7 +520,7 @@
                                 const chunkArray = JSON.parse(doc.data().payload);
                                 allLoadedData = allLoadedData.concat(chunkArray);
                             } catch(e) {}
-                        }
+                            }
                     });
 
                     if(allLoadedData.length > 0) {
@@ -591,6 +615,16 @@
             setTimeout(() => { msgBox.classList.add('hidden'); }, 3000);
         }
 
+        // Loại bỏ dấu tiếng Việt để phục vụ tìm kiếm không dấu
+        function removeAccents(str) {
+            if (!str) return '';
+            return str
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D');
+        }
+
         // Filters & Render
         function refreshUI() {
             document.getElementById('select-tinh').value = '';
@@ -624,14 +658,20 @@
         function applyFilters() {
             const tinh = document.getElementById('select-tinh').value;
             const coquan = document.getElementById('select-coquan').value;
-            const search = document.getElementById('input-search').value.toLowerCase();
+            // Tìm kiếm dạng không dấu và chữ thường
+            const search = removeAccents(document.getElementById('input-search').value.toLowerCase().trim());
 
             filteredData = currentData.filter(item => {
                 const matchTinh = !tinh || item.tenTinh === tinh;
                 const matchCoQuan = !coquan || item.tenCoQuan === coquan;
+                
+                // Chuẩn hóa tên Xã Phường trong data
+                const itemXaNormalized = removeAccents(item.tenXa.toLowerCase());
+                const itemMaXa = item.maXa ? item.maXa.toLowerCase() : '';
+                
                 const matchXa = !search || 
-                                (item.tenXa && item.tenXa.toLowerCase().includes(search)) || 
-                                (item.maXa && item.maXa.includes(search));
+                                itemXaNormalized.includes(search) || 
+                                itemMaXa.includes(search);
                 return matchTinh && matchCoQuan && matchXa;
             });
             renderTable();
@@ -645,8 +685,8 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" class="px-4 py-20 text-center text-slate-500">
-                            <i class="fas fa-folder-open text-3xl mb-3 text-slate-700"></i>
-                            <p class="font-bold text-[11px] text-slate-400 tracking-wider">KHÔNG CÓ DỮ LIỆU</p>
+                            <i class="fas fa-folder-open text-4xl mb-3 text-slate-700"></i>
+                            <p class="font-bold text-[11px] text-slate-400 tracking-wider">KHÔNG CÓ DỮ LIỆU PHÙ HỢP</p>
                         </td>
                     </tr>`;
                 return;
@@ -657,13 +697,13 @@
             displayData.forEach((row, idx) => {
                 html += `
                     <tr>
-                        <td class="px-3 py-2.5 text-[10px] text-slate-500 text-center">${row.stt || (idx + 1)}</td>
-                        <td class="px-3 py-2.5 text-[10px] font-bold text-sky-500">${row.maTinh}</td>
-                        <td class="px-3 py-2.5 text-[11px] text-slate-200">${row.tenTinh}</td>
-                        <td class="px-3 py-2.5 text-[10px] font-bold text-teal-400">${row.maCoQuan}</td>
-                        <td class="px-3 py-2.5 text-[11px] font-medium text-slate-300">${row.tenCoQuan}</td>
-                        <td class="px-3 py-2.5 text-[10px] text-slate-500">${row.maXa}</td>
-                        <td class="px-3 py-2.5 text-[11px] text-slate-300">${row.tenXa}</td>
+                        <td class="px-5 py-3 text-[10px] text-slate-500 text-center">${row.stt || (idx + 1)}</td>
+                        <td class="px-5 py-3 text-[10px] font-bold text-sky-500">${row.maTinh}</td>
+                        <td class="px-5 py-3 text-[11px] text-slate-200">${row.tenTinh}</td>
+                        <td class="px-5 py-3 text-[10px] font-bold text-teal-400">${row.maCoQuan}</td>
+                        <td class="px-5 py-3 text-[11px] font-medium text-slate-300">${row.tenCoQuan}</td>
+                        <td class="px-5 py-3 text-[10px] text-slate-500">${row.maXa}</td>
+                        <td class="px-5 py-3 text-[11px] text-slate-300">${row.tenXa}</td>
                     </tr>`;
             });
             if(filteredData.length > 500){
@@ -671,6 +711,109 @@
             }
             tbody.innerHTML = html;
         }
+
+        // Bóc tách Phường/Xã từ thông tin địa chỉ MST
+        function extractWardOrCommune(address) {
+            if (!address) return '';
+            // Tách các phân đoạn địa chỉ theo dấu phẩy
+            const parts = address.split(',');
+            for (let part of parts) {
+                part = part.trim();
+                const partLower = part.toLowerCase();
+                if (partLower.startsWith('phường ') || partLower.startsWith('xã ') || partLower.startsWith('thị trấn ')) {
+                    return part; // Trả về dạng như: "Phường Thanh Bình"
+                }
+            }
+            // Fallback: Tìm cụm từ khớp Regex
+            const match = address.match(/(Phường|Xã|Thị trấn)\s+[^\d,]+/i);
+            if (match) {
+                return match[0].trim();
+            }
+            return '';
+        }
+
+        // Bóc tách Tỉnh/Thành phố từ thông tin địa chỉ MST
+        function extractCityOrProvince(address) {
+            if (!address) return '';
+            const match = address.match(/(thành phố|tỉnh)\s+([^,]+)/i);
+            return match ? match[2].trim() : '';
+        }
+
+        // Logic Tra cứu Mã Số Thuế Doanh Nghiệp (MST)
+        document.getElementById('btn-search-mst').addEventListener('click', async () => {
+            const mstInput = document.getElementById('input-mst').value.trim();
+            const resultBox = document.getElementById('mst-result-box');
+            const compName = document.getElementById('mst-company-name');
+            const compAddr = document.getElementById('mst-company-address');
+            const extInfo = document.getElementById('mst-extracted-info');
+            const btn = document.getElementById('btn-search-mst');
+
+            if(!mstInput) {
+                alert("Vui lòng nhập Mã số thuế cần tra cứu.");
+                return;
+            }
+
+            try {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                
+                // Gửi request lên cổng cổng thông tin doanh nghiệp qua API VietQR Business
+                const response = await fetch(`https://api.vietqr.io/v2/business/${mstInput}`);
+                if (!response.ok) {
+                    throw new Error("Không thể kết nối cổng thông tin.");
+                }
+
+                const resData = await response.json();
+                if (resData && resData.code === "00" && resData.data) {
+                    const company = resData.data;
+                    resultBox.classList.remove('hidden');
+                    compName.innerText = `🏢 ${company.name || company.displayName}`;
+                    compAddr.innerText = `📍 Địa chỉ: ${company.address}`;
+
+                    // Bóc tách xã phường & Tỉnh thành
+                    const extractedWard = extractWardOrCommune(company.address);
+                    const extractedCity = extractCityOrProvince(company.address);
+
+                    if(extractedWard) {
+                        extInfo.innerHTML = `🔍 Tìm thấy xã/phường:<br><span class="text-sky-300 font-bold">${extractedWard}</span>`;
+                        
+                        // 1. Gán Tỉnh/Thành phố nếu khớp
+                        if(extractedCity) {
+                            const selectTinh = document.getElementById('select-tinh');
+                            const normalizedExtractedCity = removeAccents(extractedCity.toLowerCase());
+                            for(let option of selectTinh.options) {
+                                if(option.value && removeAccents(option.value.toLowerCase()).includes(normalizedExtractedCity)) {
+                                    selectTinh.value = option.value;
+                                    populateCoQuanSelect();
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 2. Gán tên Xã Phường tìm được vào ô bộ lọc tìm kiếm
+                        document.getElementById('input-search').value = extractedWard;
+                        
+                        // 3. Thực thi kích hoạt bộ lọc ngay lập tức
+                        applyFilters();
+                    } else {
+                        extInfo.innerText = "⚠️ Không thể bóc tách xã/phường từ địa chỉ này.";
+                    }
+                } else {
+                    resultBox.classList.remove('hidden');
+                    compName.innerText = "❌ Không tìm thấy thông tin";
+                    compAddr.innerText = "Vui lòng kiểm tra lại mã số thuế hoặc thử lại sau.";
+                    extInfo.innerText = "";
+                }
+            } catch(e) {
+                resultBox.classList.remove('hidden');
+                compName.innerText = "⚠️ Lỗi kết nối";
+                compAddr.innerText = "Cổng kết nối Masothue/VietQR bị gián đoạn.";
+                extInfo.innerText = "";
+            } finally {
+                btn.innerHTML = '<i class="fas fa-search"></i> Tìm';
+                btn.disabled = false;
+            }
+        });
 
         document.getElementById('select-tinh').addEventListener('change', () => {
             document.getElementById('select-coquan').value = "";
