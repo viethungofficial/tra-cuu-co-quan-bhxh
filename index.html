@@ -97,8 +97,12 @@
             border-bottom: 1px solid rgba(255,255,255,0.05); 
         }
         
-        /* Dòng dữ liệu mượt mà */
-        tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.02); transition: background-color 0.2s ease; }
+        /* Dòng dữ liệu mượt mà với hiệu ứng Hover phát sáng Neon */
+        tbody tr { border-bottom: 1px solid rgba(255, 255, 255, 0.02); transition: all 0.25s ease; }
+        tbody tr:hover { 
+            background-color: rgba(14, 165, 233, 0.12) !important; 
+            box-shadow: inset 3px 0 0 0 #38bdf8;
+        }
 
         /* Thẻ Input/Select Dark Mượt - Nhỏ gọn */
         .dark-input {
@@ -114,15 +118,6 @@
             background-color: rgba(15, 23, 42, 0.8);
         }
 
-        /* Loading Animation */
-        .tech-radar {
-            border: 2px dashed rgba(14, 165, 233, 0.3);
-            border-top: 2px solid #0ea5e9;
-            border-bottom: 2px solid #10b981;
-            animation: spin 3s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
         /* Chống vỡ Layout, Responsive cho di động */
         @media (max-width: 1024px) {
             .main-layout { display: flex !important; flex-direction: column !important; min-height: auto !important; overflow: visible !important; }
@@ -136,7 +131,7 @@
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
 
-    <!-- Loading Screen -->
+    <!-- Loading Screen (Radar + 0-100% progress) -->
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="relative w-28 h-28 mb-6 flex justify-center items-center">
             <div class="absolute inset-0 bg-sky-500/10 rounded-full blur-xl"></div>
@@ -175,14 +170,14 @@
                 </div>
             </div>
             
-            <!-- Phải: Admin -->
+            <!-- Phải: Admin Auth -->
             <div class="flex items-center gap-3">
                 <!-- Nút Đăng nhập -->
                 <button id="btn-login-trigger" class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-sky-900/50 text-sky-400 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-slate-700 hover:border-sky-500/50 shadow-sm">
                     <i class="fas fa-shield-alt"></i> <span class="hidden sm:inline">Admin</span>
                 </button>
                 
-                <!-- Nút Đăng xuất (Ẩn) -->
+                <!-- Nút Đăng xuất (Ẩn mặc định) -->
                 <div id="admin-user-info" class="hidden items-center gap-2">
                     <span class="text-emerald-400 text-[9px] font-bold border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-1 rounded hidden md:block">
                         <i class="fas fa-check-circle"></i> Đã xác thực
@@ -196,9 +191,9 @@
     </header>
 
     <!-- Main Layout: Cấu trúc KHÓA CHIỀU CAO - Hai cột luôn bằng nhau -->
-    <main class="main-layout w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0 mb-6">
+    <main class="main-layout flex-1 w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0 mb-6">
         
-        <!-- CỘT TRÁI: SIDEBAR (Khối dẫn dắt chiều cao cho layout) -->
+        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Tra cứu MST -> Cổng Trực Tuyến -> Liên Hệ) -->
         <aside class="sidebar-col flex flex-col gap-3">
             
             <!-- Bộ Lọc Tìm Kiếm -->
@@ -241,11 +236,11 @@
                             <i class="fas fa-search"></i> Tìm
                         </button>
                     </div>
-                    <!-- Hộp kết quả tra cứu MST -->
+                    <!-- Hộp kết quả tra cứu MST (Biến mất ngay khi xóa sạch MST trong ô nhập) -->
                     <div id="mst-result-box" class="hidden text-[10px] p-2 bg-slate-950/70 border border-white/5 rounded-lg space-y-1.5">
                         <p class="font-bold text-sky-400 leading-tight" id="mst-company-name"></p>
                         <p class="text-slate-400 leading-tight" id="mst-company-address"></p>
-                        <p class="text-emerald-400 font-semibold" id="mst-extracted-info"></p>
+                        <p class="text-emerald-400 font-semibold text-[10px]" id="mst-extracted-info"></p>
                     </div>
                 </div>
             </div>
@@ -256,19 +251,19 @@
                     <i class="fas fa-globe text-sky-500"></i> Cổng Trực Tuyến
                 </div>
                 <div class="p-2.5 grid grid-cols-2 gap-2">
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-sky-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-sky-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-qrcode text-sky-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Mã số<br>BHXH</span>
                     </a>
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-emerald-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-emerald-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-id-card text-emerald-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Thẻ<br>BHYT</span>
                     </a>
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-purple-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-purple-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-building text-purple-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Đơn vị<br>tham gia</span>
                     </a>
-                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-orange-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-orange-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-laptop-house text-orange-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Dịch vụ<br>công</span>
                     </a>
@@ -278,34 +273,34 @@
             <!-- Liên Hệ Hỗ Trợ -->
             <div class="smooth-panel flex-shrink-0">
                 <div class="panel-header flex-shrink-0">
-                    <i class="fas fa-headset text-sky-500"></i> Liên Hệ
+                    <i class="fas fa-headset text-sky-500"></i> Liên Hệ Hỗ Trợ
                 </div>
-                <div class="p-3 flex flex-col justify-center bg-slate-900/30">
+                <div class="p-3.5 flex flex-col justify-center bg-slate-900/30">
                     <!-- Dòng 1 -->
                     <div class="grid grid-cols-2 gap-2 mb-2">
-                        <a href="tel:19006134" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-rose-500/30 transition-all group">
-                            <i class="fas fa-phone-alt text-rose-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">1900.6134</span>
+                        <a href="tel:19006134" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-rose-500/30 transition-all group">
+                            <i class="fas fa-phone-alt text-rose-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">1900.6134</span>
                         </a>
-                        <a href="https://visnam.com/" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-sky-500/30 transition-all group">
-                            <i class="fas fa-globe text-sky-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Website</span>
+                        <a href="https://visnam.com/" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-sky-500/30 transition-all group">
+                            <i class="fas fa-globe text-sky-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Website</span>
                         </a>
                     </div>
                     <!-- Dòng 2 -->
                     <div class="grid grid-cols-2 gap-2">
-                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-blue-500/30 transition-all group">
-                            <i class="fas fa-comment-dots text-blue-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Zalo OA</span>
+                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-blue-500/30 transition-all group">
+                            <i class="fas fa-comment-dots text-blue-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Zalo OA</span>
                         </a>
-                        <a href="https://www.facebook.com/visnamcorp" target="_blank" class="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-800/80 border border-transparent hover:border-indigo-500/30 transition-all group">
-                            <i class="fab fa-facebook-f text-indigo-500 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
+                        <a href="https://www.facebook.com/visnamcorp" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-indigo-500/30 transition-all group">
+                            <i class="fab fa-facebook-f text-indigo-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
                             <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Fanpage</span>
                         </a>
                     </div>
                 </div>
                 <div class="py-2.5 text-center bg-slate-900 border-t border-white/5 flex-shrink-0">
-                    <p class="text-[8px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year"></span> VISNAM JSC.</p>
+                    <p class="text-[8px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year">2026</span> VISNAM JSC.</p>
                 </div>
             </div>
         </aside>
@@ -325,14 +320,14 @@
                         <!-- Nút Upload ẩn đi, chỉ hiện khi Firebase Auth Admin -->
                         <div id="upload-section" class="hidden">
                             <input type="file" id="excelUpload" accept=".xlsx, .xls" class="hidden" />
-                            <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-[9px] font-bold transition-colors flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                            <label for="excelUpload" id="upload-label" class="cursor-pointer bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-lg text-[9px] font-bold transition-colors flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
                                 <i class="fas fa-cloud-upload-alt"></i> TẢI EXCEL
                             </label>
                         </div>
 
-                    <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
-                        <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
-                    </span>
+                        <span id="record-count" class="bg-slate-800/80 text-sky-400 text-[9px] font-bold px-2 py-1 rounded-md border border-slate-700 shadow-inner">
+                            <i class="fas fa-spinner fa-spin mr-1"></i> Tính...
+                        </span>
                     </div>
                 </div>
                 
@@ -342,13 +337,13 @@
                         <table class="table-fixed min-w-[880px] w-full text-left border-collapse">
                             <!-- Định cấu hình chiều rộng cố định cho từng cột -->
                             <colgroup>
-                                <col style="width: 55px;">
-                                <col style="width: 85px;">
-                                <col style="width: 140px;">
-                                <col style="width: 100px;">
-                                <col style="width: 210px;">
-                                <col style="width: 90px;">
-                                <col style="width: 200px;">
+                                <col style="width: 55px;" />
+                                <col style="width: 85px;" />
+                                <col style="width: 140px;" />
+                                <col style="width: 100px;" />
+                                <col style="width: 210px;" />
+                                <col style="width: 90px;" />
+                                <col style="width: 200px;" />
                             </colgroup>
                             <thead>
                                 <tr>
@@ -362,7 +357,7 @@
                                 </tr>
                             </thead>
                             <tbody id="table-body">
-                                <!-- JS Render Here -->
+                                <!-- Dữ liệu JS được chèn ở đây -->
                             </tbody>
                         </table>
                     </div>
@@ -372,23 +367,22 @@
     </main>
 
     <!-- Modal Admin Firebase Login Dark -->
-    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity">
-        <div class="smooth-panel w-full max-w-[340px] border border-sky-500/30 shadow-[0_0_40px_rgba(56,189,248,0.2)]">
-            <div class="p-5 border-b border-white/5 bg-slate-900 text-center relative">
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity">
+        <div class="smooth-panel w-full max-w-[320px] border border-sky-500/30 shadow-[0_0_40px_rgba(56,189,248,0.2)]">
+            <div class="p-4 border-b border-white/5 bg-slate-900 text-center relative">
                 <button id="btn-close-login" class="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
                 <div class="w-10 h-10 bg-sky-500/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-sky-500/30">
-                    <i class="fas fa-lock text-sky-500 text-xl"></i>
+                    <i class="fas fa-lock text-sky-500 text-lg"></i>
                 </div>
                 <h3 class="text-[13px] font-bold text-white uppercase tracking-wider">ĐĂNG NHẬP ADMIN</h3>
                 <p class="text-[9px] text-slate-400 mt-1">Kết nối Firebase Authentication</p>
             </div>
             
             <form id="login-form" class="p-5 space-y-3 bg-[#020617]">
-                
-                <div id="login-error" class="hidden text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg text-[10px] font-bold text-center">
-                    <i class="fas fa-exclamation-circle mr-1"></i> Sai email hoặc mật khẩu!
+                <div id="login-error" class="hidden text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-lg text-[10px] font-bold text-center">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Sai tài khoản hoặc mật khẩu!
                 </div>
                 
                 <div class="relative">
@@ -400,26 +394,26 @@
                     <input type="password" id="password" placeholder="Mật khẩu" required class="dark-input w-full pl-8 pr-3 py-2 text-[11px] rounded-md font-medium" />
                 </div>
 
-                <button type="submit" id="btn-login-submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold py-2.5 rounded-md text-[11px] tracking-wider transition-all mt-3 shadow-[0_0_15px_rgba(14,165,233,0.3)] hover:shadow-[0_0_20px_rgba(14,165,233,0.5)]">
+                <button type="submit" id="btn-login-submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold py-2.5 rounded-md text-[11px] tracking-wider transition-all mt-3 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
                     ĐĂNG NHẬP
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Cấu hình JS cho Tuyết rơi -->
+    <!-- Script Tuyết Rơi -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const snowContainer = document.getElementById('snow-container');
-            const flakeCount = 100; // Tăng lượng tuyết theo yêu cầu
-            const snowIcons = ['❄', '❅', '❆']; // Icon tuyết thật rõ nét
+            const flakeCount = 100; // Số lượng bông tuyết
+            const snowIcons = ['❄', '❅', '❆']; 
             
             for (let i = 0; i < flakeCount; i++) {
                 const flake = document.createElement('div');
                 flake.className = 'snowflake';
                 flake.innerHTML = snowIcons[Math.floor(Math.random() * snowIcons.length)];
                 
-                const size = Math.random() * 12 + 8; // Kích thước từ 8px đến 20px
+                const size = Math.random() * 12 + 8; // Kích thước ngẫu nhiên
                 flake.style.fontSize = size + 'px';
                 flake.style.left = Math.random() * 100 + 'vw';
                 flake.style.opacity = Math.random() * 0.6 + 0.2; 
@@ -431,13 +425,13 @@
         });
     </script>
 
-    <!-- Firebase và Logic Ứng dụng -->
+    <!-- Firebase JS SDK & Logic Tra cứu -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cấu hình Database Firebase
+        // Cấu hình Database Firebase của bạn
         const firebaseConfig = {
           apiKey: "AIzaSyC-QUv2MgckcmqMbSTfksI0TUQCiTYW_PE",
           authDomain: "tra-cuu-co-quan-bhxh.firebaseapp.com",
@@ -457,16 +451,28 @@
             db = getFirestore(app);
             isFirebaseActive = true;
         } catch(e) {
-            console.error("Firebase init failed");
+            console.error("Firebase init failed", e);
         }
 
-        let currentData = [];
+        // Khởi tạo biến State toàn cục
+        let currentData = [
+          { stt: '1', maTinh: '01', tenTinh: 'TP Hà Nội', maCoQuan: '001', tenCoQuan: 'BHXH TP Hà Nội', maXa: '09562', tenXa: 'Phường Yên Nghĩa' },
+          { stt: '2', maTinh: '01', tenTinh: 'TP Hà Nội', maCoQuan: '001', tenCoQuan: 'BHXH TP Hà Nội', maXa: '09556', tenXa: 'Phường Hà Đông' },
+          { stt: '3', maTinh: '01', tenTinh: 'TP Hà Nội', maCoQuan: '00101', tenCoQuan: 'BHXH cơ sở Ba Đình', maXa: '00025', tenXa: 'Phường Giảng Võ' },
+          { stt: '4', maTinh: '01', tenTinh: 'TP Hà Nội', maCoQuan: '00102', tenCoQuan: 'BHXH cơ sở Hoàn Kiếm', maXa: '00226', tenXa: 'Phường Văn Miếu' },
+          { stt: '5', maTinh: '96', tenTinh: 'Tỉnh Cà Mau', maCoQuan: '09604', tenCoQuan: 'BHXH cơ sở Trần Văn Thời', maXa: '32104', tenXa: 'Xã Đá Bạc' },
+          { stt: '6', maTinh: '96', tenTinh: 'Tỉnh Cà Mau', maCoQuan: '09605', tenCoQuan: 'BHXH cơ sở Cái Nước', maXa: '32227', tenXa: 'Xã Nguyễn Việt Khái' },
+          { stt: '7', maTinh: '96', tenTinh: 'Tỉnh Cà Mau', maCoQuan: '09605', tenCoQuan: 'BHXH cơ sở Cái Nước', maXa: '32128', tenXa: 'Xã Cái Nước' }
+        ];
         let filteredData = [];
         let isAdmin = false;
+        let selectedTinh = '';
+        let selectedCoQuan = '';
+        let searchXa = '';
 
         document.getElementById('year').innerText = new Date().getFullYear();
 
-        // Xử lý Loading Animation
+        // Tiến trình Loading Screen
         let progress = 0;
         let loadingFinished = false;
         const progressEl = document.getElementById('loading-percentage');
@@ -497,55 +503,261 @@
 
         // Lắng nghe trạng thái đăng nhập từ Firebase Auth
         if(isFirebaseActive) {
-            onAuthStateChanged(auth, (user) => {
-                if (user && !user.isAnonymous && user.email) {
-                    isAdmin = true; // Là user có email thật
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    if (!user.isAnonymous && user.email) {
+                        isAdmin = true;
+                    } else {
+                        isAdmin = false;
+                    }
                 } else {
-                    isAdmin = false; // Là user ẩn danh (người xem)
+                    isAdmin = false;
+                    try {
+                        await signInAnonymously(auth);
+                        return;
+                    } catch(e) {
+                        console.warn("Lỗi đăng nhập ẩn danh");
+                    }
                 }
                 updateAdminUI();
             });
+
+            // Lắng nghe dữ liệu
+            const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
+            onSnapshot(dataCollectionRef, (snapshot) => {
+                let allLoadedData = [];
+                snapshot.forEach(doc => {
+                    if(doc.id.startsWith('chunk_')) {
+                        try {
+                            const chunkArray = JSON.parse(doc.data().payload);
+                            allLoadedData = allLoadedData.concat(chunkArray);
+                        } catch(e) {}
+                    }
+                });
+
+                if(allLoadedData.length > 0) {
+                    currentData = allLoadedData;
+                    refreshUI();
+                }
+                loadingFinished = true;
+            }, (error) => { loadingFinished = true; });
+        } else {
+            loadingFinished = true;
         }
 
-        async function initFirebaseAuthAndData() {
-            if(!isFirebaseActive) {
-                loadingFinished = true;
+        // Đồng bộ các bộ lọc tìm kiếm
+        function refreshUI() {
+            populateTinhSelect();
+            populateCoQuanSelect();
+            applyFilters();
+        }
+
+        function populateTinhSelect() {
+            const select = document.getElementById('select-tinh');
+            const tinhSet = new Set(currentData.map(item => item.tenTinh));
+            select.innerHTML = '<option value="">Tỉnh/Thành phố...</option>';
+            Array.from(tinhSet).sort().forEach(tinh => {
+                select.innerHTML += `<option value="${tinh}">${tinh}</option>`;
+            });
+            select.value = selectedTinh;
+        }
+
+        function populateCoQuanSelect() {
+            const select = document.getElementById('select-coquan');
+            let dataDeLoc = selectedTinh ? currentData.filter(item => item.tenTinh === selectedTinh) : currentData;
+            const coQuanSet = new Set(dataDeLoc.map(item => item.tenCoQuan));
+            select.innerHTML = '<option value="">Cơ quan BHXH...</option>';
+            Array.from(coQuanSet).sort().forEach(cq => {
+                select.innerHTML += `<option value="${cq}">${cq}</option>`;
+            });
+            select.value = selectedCoQuan;
+        }
+
+        function removeAccents(str) {
+            if (!str) return '';
+            return str
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D');
+        }
+
+        function applyFilters() {
+            const search = removeAccents(searchXa.toLowerCase().trim());
+            filteredData = currentData.filter(item => {
+                const matchTinh = selectedTinh === '' || item.tenTinh === selectedTinh;
+                const matchCoQuan = selectedCoQuan === '' || item.tenCoQuan === selectedCoQuan;
+                const itemXaNormalized = removeAccents(item.tenXa.toLowerCase());
+                const itemMaXa = item.maXa ? item.maXa.toLowerCase() : '';
+                
+                const matchXa = !search || 
+                                itemXaNormalized.includes(search) || 
+                                itemMaXa.includes(search);
+                return matchTinh && matchCoQuan && matchXa;
+            });
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            document.getElementById('record-count').innerText = `${filteredData.length.toLocaleString('vi-VN')} dòng`;
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-4 py-20 text-center text-slate-500">
+                            <i class="fas fa-folder-open text-4xl mb-3 text-slate-700"></i>
+                            <p class="font-bold text-[11px] text-slate-400 tracking-wider">KHÔNG CÓ DỮ LIỆU PHÙ HỢP</p>
+                        </td>
+                    </tr>`;
                 return;
             }
+
+            const displayData = filteredData.slice(0, 500); 
+            let html = '';
+            displayData.forEach((row, idx) => {
+                html += `
+                    <tr>
+                        <td class="px-5 py-3 text-[10px] text-slate-500 text-center truncate">${row.stt || (idx + 1)}</td>
+                        <td class="px-5 py-3 text-[10px] font-bold text-sky-500 truncate">${row.maTinh}</td>
+                        <td class="px-5 py-3 text-[11px] text-slate-200 truncate" title="${row.tenTinh}">${row.tenTinh}</td>
+                        <td class="px-5 py-3 text-[10px] font-bold text-teal-400 truncate">${row.maCoQuan}</td>
+                        <td class="px-5 py-3 text-[11px] font-medium text-slate-300 truncate" title="${row.tenCoQuan}">${row.tenCoQuan}</td>
+                        <td class="px-5 py-3 text-[10px] text-slate-500 truncate">${row.maXa}</td>
+                        <td class="px-5 py-3 text-[11px] text-slate-300 truncate" title="${row.tenXa}">${row.tenXa}</td>
+                    </tr>`;
+            });
+            if(filteredData.length > 500){
+                html += `<tr><td colspan="7" class="text-center py-2 text-[9px] text-sky-500 bg-slate-900/50 font-medium border-t border-white/5 uppercase">Đang hiển thị 500 dòng đầu.</td></tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+
+        // Bóc tách Phường/Xã từ thông tin địa chỉ MST
+        function extractWardOrCommune(address) {
+            if (!address) return '';
+            const parts = address.split(',');
+            for (let part of parts) {
+                part = part.trim();
+                const partLower = part.toLowerCase();
+                if (partLower.startsWith('phường ') || partLower.startsWith('xã ') || partLower.startsWith('thị trấn ')) {
+                    return part;
+                }
+            }
+            const match = address.match(/(Phường|Xã|Thị trấn)\s+[^\d,]+/i);
+            return match ? match[0].trim() : '';
+        }
+
+        // Bóc tách Tỉnh/Thành phố từ thông tin địa chỉ MST
+        function extractCityOrProvince(address) {
+            if (!address) return '';
+            const match = address.match(/(thành phố|tỉnh)\s+([^,]+)/i);
+            return match ? match[2].trim() : '';
+        }
+
+        // Gắn sự kiện lắng nghe bộ lọc
+        document.getElementById('select-tinh').addEventListener('change', (e) => {
+            selectedTinh = e.target.value;
+            selectedCoQuan = '';
+            populateCoQuanSelect();
+            applyFilters();
+        });
+
+        document.getElementById('select-coquan').addEventListener('change', (e) => {
+            selectedCoQuan = e.target.value;
+            applyFilters();
+        });
+
+        document.getElementById('input-search').addEventListener('input', (e) => {
+            searchXa = e.target.value;
+            applyFilters();
+        });
+
+        // Xử lý khi Thay đổi MST (Tự động xóa kết quả khi rỗng)
+        document.getElementById('input-mst').addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if (!val) {
+                document.getElementById('mst-result-box').classList.add('hidden');
+                document.getElementById('input-search').value = '';
+                searchXa = '';
+                applyFilters();
+            }
+        });
+
+        // Tra cứu MST
+        document.getElementById('btn-search-mst').addEventListener('click', async () => {
+            const mstInput = document.getElementById('input-mst').value.trim();
+            const resultBox = document.getElementById('mst-result-box');
+            const compName = document.getElementById('mst-company-name');
+            const compAddr = document.getElementById('mst-company-address');
+            const extInfo = document.getElementById('mst-extracted-info');
+            const btn = document.getElementById('btn-search-mst');
+
+            if(!mstInput) {
+                alert("Vui lòng nhập Mã số thuế cần tra cứu.");
+                return;
+            }
+
             try {
-                // Ưu tiên token của môi trường, không có thì login ẩn danh cho khách đọc dữ liệu
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else if (!auth.currentUser) {
-                    await signInAnonymously(auth);
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                
+                const response = await fetch(`https://api.vietqr.io/v2/business/${mstInput}`);
+                if (!response.ok) {
+                    throw new Error("Không thể kết nối cổng thông tin.");
                 }
 
-                // Lắng nghe dữ liệu
-                const dataCollectionRef = collection(db, 'artifacts', 'tra-cuu-co-quan-bhxh', 'public', 'data', 'bhxh_data');
-                onSnapshot(dataCollectionRef, (snapshot) => {
-                    let allLoadedData = [];
-                    snapshot.forEach(doc => {
-                        if(doc.id.startsWith('chunk_')) {
-                            try {
-                                const chunkArray = JSON.parse(doc.data().payload);
-                                allLoadedData = allLoadedData.concat(chunkArray);
-                            } catch(e) {}
+                const resData = await response.json();
+                if (resData && resData.code === "00" && resData.data) {
+                    const company = resData.data;
+                    resultBox.classList.remove('hidden');
+                    compName.innerText = `🏢 ${company.name || company.displayName}`;
+                    compAddr.innerText = `📍 Địa chỉ: ${company.address}`;
+
+                    const extractedWard = extractWardOrCommune(company.address);
+                    const extractedCity = extractCityOrProvince(company.address);
+
+                    if(extractedWard) {
+                        extInfo.innerHTML = `🔍 Tìm thấy xã/phường:<br><span class="text-sky-300 font-bold">${extractedWard}</span>`;
+                        
+                        if(extractedCity) {
+                            const normalizedExtractedCity = removeAccents(extractedCity.toLowerCase());
+                            const selectTinh = document.getElementById('select-tinh');
+                            for(let option of selectTinh.options) {
+                                if(option.value && removeAccents(option.value.toLowerCase()).includes(normalizedExtractedCity)) {
+                                    selectedTinh = option.value;
+                                    selectTinh.value = option.value;
+                                    populateCoQuanSelect();
+                                    break;
+                                }
                             }
-                    });
+                        }
 
-                    if(allLoadedData.length > 0) {
-                        currentData = allLoadedData;
-                        refreshUI();
+                        document.getElementById('input-search').value = extractedWard;
+                        searchXa = extractedWard;
+                        applyFilters();
+                    } else {
+                        extInfo.innerText = "⚠️ Không thể bóc tách xã/phường từ địa chỉ này.";
                     }
-                    loadingFinished = true;
-                }, (error) => { loadingFinished = true; });
-            } catch (error) { loadingFinished = true; }
-        }
-        
-        initFirebaseAuthAndData();
+                } else {
+                    resultBox.classList.remove('hidden');
+                    compName.innerText = "❌ Không tìm thấy thông tin";
+                    compAddr.innerText = "Vui lòng kiểm tra lại mã số thuế hoặc thử lại sau.";
+                    extInfo.innerText = "";
+                }
+            } catch(e) {
+                resultBox.classList.remove('hidden');
+                compName.innerText = "⚠️ Lỗi kết nối";
+                compAddr.innerText = "Cổng kết nối Masothue/VietQR bị gián đoạn.";
+                extInfo.innerText = "";
+            } finally {
+                btn.innerHTML = '<i class="fas fa-search"></i> Tìm';
+                btn.disabled = false;
+            }
+        });
 
-        // Xử lý Upload Excel (Chỉ thực hiện được khi Admin)
-        document.getElementById('excelUpload').addEventListener('change', async function(e) {
+        // Xử lý Upload Excel Admin
+        document.getElementById('excelUpload').addEventListener('change', async (e) => {
             if (!isAdmin) return;
             const file = e.target.files[0];
             if (!file) return;
@@ -555,10 +767,10 @@
             label.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Uploading...';
 
             const reader = new FileReader();
-            reader.onload = async function(event) {
+            reader.onload = async (event) => {
                 try {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+                    const bytes = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(bytes, { type: 'array' });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     
@@ -611,229 +823,7 @@
             reader.readAsArrayBuffer(file);
         });
 
-        function showUploadMessage(text, isError = false) {
-            const msgBox = document.getElementById('upload-message');
-            msgBox.innerHTML = text;
-            msgBox.classList.remove('hidden');
-            if(isError) {
-                msgBox.classList.add('text-red-400', 'bg-red-500/10', 'border-red-500/20');
-                msgBox.classList.remove('text-sky-400', 'bg-sky-500/10', 'border-sky-500/20');
-            } else {
-                msgBox.classList.add('text-sky-400', 'bg-sky-500/10', 'border-sky-500/20');
-                msgBox.classList.remove('text-red-400', 'bg-red-500/10', 'border-red-500/20');
-            }
-            setTimeout(() => { msgBox.classList.add('hidden'); }, 3000);
-        }
-
-        // Loại bỏ dấu tiếng Việt để phục vụ tìm kiếm không dấu
-        function removeAccents(str) {
-            if (!str) return '';
-            return str
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/đ/g, 'd')
-                .replace(/Đ/g, 'D');
-        }
-
-        // Filters & Render
-        function refreshUI() {
-            document.getElementById('select-tinh').value = '';
-            document.getElementById('select-coquan').value = '';
-            document.getElementById('input-search').value = '';
-            populateTinhSelect();
-            populateCoQuanSelect();
-            applyFilters();
-        }
-
-        function populateTinhSelect() {
-            const select = document.getElementById('select-tinh');
-            const tinhSet = new Set(currentData.map(item => item.tenTinh));
-            select.innerHTML = '<option value="">Tỉnh/Thành phố...</option>';
-            Array.from(tinhSet).sort().forEach(tinh => {
-                select.innerHTML += `<option value="${tinh}">${tinh}</option>`;
-            });
-        }
-
-        function populateCoQuanSelect() {
-            const select = document.getElementById('select-coquan');
-            const tinhChon = document.getElementById('select-tinh').value;
-            let dataDeLoc = tinhChon ? currentData.filter(item => item.tenTinh === tinhChon) : currentData;
-            const coQuanSet = new Set(dataDeLoc.map(item => item.tenCoQuan));
-            select.innerHTML = '<option value="">Cơ quan BHXH...</option>';
-            Array.from(coQuanSet).sort().forEach(cq => {
-                select.innerHTML += `<option value="${cq}">${cq}</option>`;
-            });
-        }
-
-        function applyFilters() {
-            const tinh = document.getElementById('select-tinh').value;
-            const coquan = document.getElementById('select-coquan').value;
-            // Tìm kiếm dạng không dấu và chữ thường
-            const search = removeAccents(document.getElementById('input-search').value.toLowerCase().trim());
-
-            filteredData = currentData.filter(item => {
-                const matchTinh = !tinh || item.tenTinh === tinh;
-                const matchCoQuan = !coquan || item.tenCoQuan === coquan;
-                
-                // Chuẩn hóa tên Xã Phường trong data
-                const itemXaNormalized = removeAccents(item.tenXa.toLowerCase());
-                const itemMaXa = item.maXa ? item.maXa.toLowerCase() : '';
-                
-                const matchXa = !search || 
-                                itemXaNormalized.includes(search) || 
-                                itemMaXa.includes(search);
-                return matchTinh && matchCoQuan && matchXa;
-            });
-            renderTable();
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            document.getElementById('record-count').innerText = `${filteredData.length.toLocaleString('vi-VN')} dòng`;
-            
-            if (filteredData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-4 py-20 text-center text-slate-500">
-                            <i class="fas fa-folder-open text-4xl mb-3 text-slate-700"></i>
-                            <p class="font-bold text-[11px] text-slate-400 tracking-wider">KHÔNG CÓ DỮ LIỆU PHÙ HỢP</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            const displayData = filteredData.slice(0, 500); 
-            let html = '';
-            displayData.forEach((row, idx) => {
-                html += `
-                    <tr>
-                        <td class="px-5 py-3 text-[10px] text-slate-500 text-center truncate">${row.stt || (idx + 1)}</td>
-                        <td class="px-5 py-3 text-[10px] font-bold text-sky-500 truncate">${row.maTinh}</td>
-                        <td class="px-5 py-3 text-[11px] text-slate-200 truncate" title="${row.tenTinh}">${row.tenTinh}</td>
-                        <td class="px-5 py-3 text-[10px] font-bold text-teal-400 truncate">${row.maCoQuan}</td>
-                        <td class="px-5 py-3 text-[11px] font-medium text-slate-300 truncate" title="${row.tenCoQuan}">${row.tenCoQuan}</td>
-                        <td class="px-5 py-3 text-[10px] text-slate-500 truncate">${row.maXa}</td>
-                        <td class="px-5 py-3 text-[11px] text-slate-300 truncate" title="${row.tenXa}">${row.tenXa}</td>
-                    </tr>`;
-            });
-            if(filteredData.length > 500){
-                html += `<tr><td colspan="7" class="text-center py-2 text-[9px] text-sky-500 bg-slate-900/50 font-medium border-t border-white/5 uppercase">Đang hiển thị 500 dòng đầu.</td></tr>`;
-            }
-            tbody.innerHTML = html;
-        }
-
-        // Bóc tách Phường/Xã từ thông tin địa chỉ MST
-        function extractWardOrCommune(address) {
-            if (!address) return '';
-            // Tách các phân đoạn địa chỉ theo dấu phẩy
-            const parts = address.split(',');
-            for (let part of parts) {
-                part = part.trim();
-                const partLower = part.toLowerCase();
-                if (partLower.startsWith('phường ') || partLower.startsWith('xã ') || partLower.startsWith('thị trấn ')) {
-                    return part; // Trả về dạng như: "Phường Thanh Bình"
-                }
-            }
-            // Fallback: Tìm cụm từ khớp Regex
-            const match = address.match(/(Phường|Xã|Thị trấn)\s+[^\d,]+/i);
-            if (match) {
-                return match[0].trim();
-            }
-            return '';
-        }
-
-        // Bóc tách Tỉnh/Thành phố từ thông tin địa chỉ MST
-        function extractCityOrProvince(address) {
-            if (!address) return '';
-            const match = address.match(/(thành phố|tỉnh)\s+([^,]+)/i);
-            return match ? match[2].trim() : '';
-        }
-
-        // Logic Tra cứu Mã Số Thuế Doanh Nghiệp (MST)
-        document.getElementById('btn-search-mst').addEventListener('click', async () => {
-            const mstInput = document.getElementById('input-mst').value.trim();
-            const resultBox = document.getElementById('mst-result-box');
-            const compName = document.getElementById('mst-company-name');
-            const compAddr = document.getElementById('mst-company-address');
-            const extInfo = document.getElementById('mst-extracted-info');
-            const btn = document.getElementById('btn-search-mst');
-
-            if(!mstInput) {
-                alert("Vui lòng nhập Mã số thuế cần tra cứu.");
-                return;
-            }
-
-            try {
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-                
-                // Gửi request lên cổng thông tin doanh nghiệp qua API VietQR Business
-                const response = await fetch(`https://api.vietqr.io/v2/business/${mstInput}`);
-                if (!response.ok) {
-                    throw new Error("Không thể kết nối cổng thông tin.");
-                }
-
-                const resData = await response.json();
-                if (resData && resData.code === "00" && resData.data) {
-                    const company = resData.data;
-                    resultBox.classList.remove('hidden');
-                    compName.innerText = `🏢 ${company.name || company.displayName}`;
-                    compAddr.innerText = `📍 Địa chỉ: ${company.address}`;
-
-                    // Bóc tách xã phường & Tỉnh thành
-                    const extractedWard = extractWardOrCommune(company.address);
-                    const extractedCity = extractCityOrProvince(company.address);
-
-                    if(extractedWard) {
-                        extInfo.innerHTML = `🔍 Tìm thấy xã/phường:<br><span class="text-sky-300 font-bold">${extractedWard}</span>`;
-                        
-                        // 1. Gán Tỉnh/Thành phố nếu khớp
-                        if(extractedCity) {
-                            const selectTinh = document.getElementById('select-tinh');
-                            const normalizedExtractedCity = removeAccents(extractedCity.toLowerCase());
-                            for(let option of selectTinh.options) {
-                                if(option.value && removeAccents(option.value.toLowerCase()).includes(normalizedExtractedCity)) {
-                                    selectTinh.value = option.value;
-                                    populateCoQuanSelect();
-                                    break;
-                                }
-                            }
-                        }
-
-                        // 2. Gán tên Xã Phường tìm được vào ô bộ lọc tìm kiếm
-                        document.getElementById('input-search').value = extractedWard;
-                        
-                        // 3. Thực thi kích hoạt bộ lọc ngay lập tức
-                        applyFilters();
-                    } else {
-                        extInfo.innerText = "⚠️ Không thể bóc tách xã/phường từ địa chỉ này.";
-                    }
-                } else {
-                    resultBox.classList.remove('hidden');
-                    compName.innerText = "❌ Không tìm thấy thông tin";
-                    compAddr.innerText = "Vui lòng kiểm tra lại mã số thuế hoặc thử lại sau.";
-                    extInfo.innerText = "";
-                }
-            } catch(e) {
-                resultBox.classList.remove('hidden');
-                compName.innerText = "⚠️ Lỗi kết nối";
-                compAddr.innerText = "Cổng kết nối Masothue/VietQR bị gián đoạn.";
-                extInfo.innerText = "";
-            } finally {
-                btn.innerHTML = '<i class="fas fa-search"></i> Tìm';
-                btn.disabled = false;
-            }
-        });
-
-        document.getElementById('select-tinh').addEventListener('change', () => {
-            document.getElementById('select-coquan').value = "";
-            populateCoQuanSelect();
-            applyFilters();
-        });
-        document.getElementById('select-coquan').addEventListener('change', applyFilters);
-        document.getElementById('input-search').addEventListener('input', applyFilters);
-
-        // UI Đăng nhập/Đăng xuất
+        // Admin Auth UI
         const loginModal = document.getElementById('login-modal');
         document.getElementById('btn-login-trigger').addEventListener('click', () => { loginModal.classList.remove('hidden'); });
         
@@ -844,7 +834,7 @@
         }
         document.getElementById('btn-close-login').addEventListener('click', closeLogin);
 
-        // Thực hiện đăng nhập Auth Firebase
+        // Đăng nhập email/pass admin
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -864,7 +854,7 @@
             }
         });
 
-        // Đăng xuất Auth Firebase
+        // Đăng xuất Admin
         document.getElementById('btn-logout').addEventListener('click', async () => {
             if(isFirebaseActive) {
                 await signOut(auth);
@@ -886,7 +876,7 @@
             }
         }
 
-        renderTable();
+        refreshUI();
     </script>
 </body>
 </html>
