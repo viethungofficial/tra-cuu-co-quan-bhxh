@@ -18,7 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -131,6 +131,9 @@
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
 
+    <!-- Hệ thống Toast Alert thay thế cho Alert mặc định -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+
     <!-- Loading Screen (Radar + 0-100% progress) -->
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="relative w-28 h-28 mb-6 flex justify-center items-center">
@@ -193,7 +196,7 @@
     <!-- Main Layout: Cấu trúc KHÓA CHIỀU CAO - Hai cột luôn bằng nhau -->
     <main class="main-layout flex-1 w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0 mb-6">
         
-        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Tra cứu MST -> Cổng Trực Tuyến -> Liên Hệ) -->
+        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Tra cứu MST -> Cổng Trực Tuyến -> Bản Quyền) -->
         <aside class="sidebar-col flex flex-col gap-3">
             
             <!-- Bộ Lọc Tìm Kiếm -->
@@ -236,7 +239,7 @@
                             <i class="fas fa-search"></i> Tìm
                         </button>
                     </div>
-                    <!-- Hộp kết quả tra cứu MST (Biến mất ngay khi xóa sạch MST trong ô nhập) -->
+                    <!-- Hộp kết quả tra cứu MST -->
                     <div id="mst-result-box" class="hidden text-[10px] p-2 bg-slate-950/70 border border-white/5 rounded-lg space-y-1.5">
                         <p class="font-bold text-sky-400 leading-tight" id="mst-company-name"></p>
                         <p class="text-slate-400 leading-tight" id="mst-company-address"></p>
@@ -270,38 +273,9 @@
                 </div>
             </div>
 
-            <!-- Liên Hệ Hỗ Trợ -->
-            <div class="smooth-panel flex-shrink-0">
-                <div class="panel-header flex-shrink-0">
-                    <i class="fas fa-headset text-sky-500"></i> Liên Hệ Hỗ Trợ
-                </div>
-                <div class="p-3.5 flex flex-col justify-center bg-slate-900/30">
-                    <!-- Dòng 1 -->
-                    <div class="grid grid-cols-2 gap-2 mb-2">
-                        <a href="tel:19006134" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-rose-500/30 transition-all group">
-                            <i class="fas fa-phone-alt text-rose-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">1900.6134</span>
-                        </a>
-                        <a href="https://visnam.com/" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-sky-500/30 transition-all group">
-                            <i class="fas fa-globe text-sky-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Website</span>
-                        </a>
-                    </div>
-                    <!-- Dòng 2 -->
-                    <div class="grid grid-cols-2 gap-2">
-                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-blue-500/30 transition-all group">
-                            <i class="fas fa-comment-dots text-blue-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Zalo OA</span>
-                        </a>
-                        <a href="https://www.facebook.com/visnamcorp" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/80 border border-transparent hover:border-indigo-500/30 transition-all group">
-                            <i class="fab fa-facebook-f text-indigo-500 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[10px] text-slate-400 group-hover:text-slate-200">Fanpage</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="py-2.5 text-center bg-slate-900 border-t border-white/5 flex-shrink-0">
-                    <p class="text-[8px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year">2026</span> VISNAM JSC.</p>
-                </div>
+            <!-- Footer bản quyền nhỏ gọn -->
+            <div class="mt-auto py-3 text-center flex-shrink-0">
+                <p class="text-[9px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year">2026</span> VISNAM JSC.</p>
             </div>
         </aside>
 
@@ -501,6 +475,33 @@
             }, 300);
         }
 
+        // Thiết lập hệ thống thông báo Toast thay thế Alert
+        function showToast(message, isSuccess = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-lg text-[11px] font-bold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] transition-all transform translate-y-2 opacity-0 duration-300 ${
+                isSuccess 
+                ? 'bg-emerald-950/90 text-emerald-400 border border-emerald-500/30' 
+                : 'bg-red-950/90 text-red-400 border border-red-500/30'
+            }`;
+            toast.innerHTML = `
+                <i class="${isSuccess ? 'fas fa-check-circle text-emerald-400' : 'fas fa-exclamation-triangle text-red-400'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            
+            // Remove after 3.5s
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
         // Lắng nghe trạng thái đăng nhập từ Firebase Auth
         if(isFirebaseActive) {
             onAuthStateChanged(auth, async (user) => {
@@ -694,7 +695,7 @@
             const btn = document.getElementById('btn-search-mst');
 
             if(!mstInput) {
-                alert("Vui lòng nhập Mã số thuế cần tra cứu.");
+                showToast("Vui lòng nhập Mã số thuế cần tra cứu.", false);
                 return;
             }
 
@@ -719,6 +720,7 @@
 
                     if(extractedWard) {
                         extInfo.innerHTML = `🔍 Tìm thấy xã/phường:<br><span class="text-sky-300 font-bold">${extractedWard}</span>`;
+                        showToast(`Tra cứu MST thành công! Đã tìm thấy: ${extractedWard}`, true);
                         
                         if(extractedCity) {
                             const normalizedExtractedCity = removeAccents(extractedCity.toLowerCase());
@@ -738,18 +740,21 @@
                         applyFilters();
                     } else {
                         extInfo.innerText = "⚠️ Không thể bóc tách xã/phường từ địa chỉ này.";
+                        showToast("Tìm thấy thông tin doanh nghiệp nhưng không thể tự phân tích xã/phường.", false);
                     }
                 } else {
                     resultBox.classList.remove('hidden');
                     compName.innerText = "❌ Không tìm thấy thông tin";
                     compAddr.innerText = "Vui lòng kiểm tra lại mã số thuế hoặc thử lại sau.";
                     extInfo.innerText = "";
+                    showToast("Mã số thuế không tồn tại hoặc hệ thống phản hồi lỗi.", false);
                 }
             } catch(e) {
                 resultBox.classList.remove('hidden');
                 compName.innerText = "⚠️ Lỗi kết nối";
                 compAddr.innerText = "Cổng kết nối Masothue/VietQR bị gián đoạn.";
                 extInfo.innerText = "";
+                showToast("Lỗi kết nối cổng thông tin VietQR.", false);
             } finally {
                 btn.innerHTML = '<i class="fas fa-search"></i> Tìm';
                 btn.disabled = false;
@@ -807,14 +812,18 @@
                                 await setDoc(docRef, { payload: JSON.stringify(chunk) });
                             }
                             showUploadMessage(`<i class="fas fa-check-circle mr-1"></i> Lưu OK.`);
+                            showToast("Đồng bộ dữ liệu Excel lên Cloud thành công!", true);
                         } else {
                             showUploadMessage(`<i class="fas fa-exclamation-triangle mr-1"></i> Từ chối ghi.`, true);
+                            showToast("Lỗi phân quyền: Từ chối ghi dữ liệu.", false);
                         }
                     } else {
                         showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> File lỗi', true);
+                        showToast("Định dạng dữ liệu dòng trống hoặc không hợp lệ.", false);
                     }
                 } catch (error) {
                     showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> Lỗi đọc', true);
+                    showToast("Có lỗi xảy ra khi phân tích File Excel.", false);
                 } finally {
                     label.innerHTML = originalLabelText;
                     e.target.value = ''; 
@@ -847,8 +856,10 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> XỬ LÝ...';
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeLogin();
+                showToast("Đăng nhập quản trị viên thành công!", true);
             } catch(err) {
                 errorEl.classList.remove('hidden');
+                showToast("Đăng nhập thất bại. Vui lòng thử lại.", false);
             } finally {
                 btn.innerHTML = 'ĐĂNG NHẬP';
             }
@@ -858,7 +869,10 @@
         document.getElementById('btn-logout').addEventListener('click', async () => {
             if(isFirebaseActive) {
                 await signOut(auth);
-                try { await signInAnonymously(auth); } catch(e){}
+                try { 
+                    await signInAnonymously(auth); 
+                    showToast("Đã đăng xuất tài khoản Admin.", true);
+                } catch(e){}
             }
         });
 
@@ -874,6 +888,16 @@
                 document.getElementById('admin-user-info').classList.remove('flex');
                 document.getElementById('upload-section').classList.add('hidden');
             }
+        }
+
+        function showUploadMessage(msg, isError = false) {
+            const msgEl = document.getElementById('upload-message');
+            msgEl.innerHTML = msg;
+            msgEl.className = `text-[9px] font-bold px-2 py-1 rounded ${isError ? 'text-red-400 bg-red-500/10' : 'text-emerald-400 bg-emerald-500/10'}`;
+            msgEl.classList.remove('hidden');
+            setTimeout(() => {
+                msgEl.classList.add('hidden');
+            }, 4000);
         }
 
         refreshUI();
