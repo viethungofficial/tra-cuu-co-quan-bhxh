@@ -18,7 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -35,7 +35,7 @@
             display: none;
         }
 
-        /* Hiệu ứng Tuyết rơi Rõ nét */
+        /* Hiệu ứng Tuyết rơi Rõ nét (Sử dụng Text Icon) */
         .snowflake {
             position: absolute;
             top: -10vh;
@@ -53,7 +53,7 @@
             100% { transform: translateY(110vh) translateX(20px) rotate(360deg); opacity: 0; }
         }
 
-        /* Khối giao diện Dark Smooth */
+        /* Khối giao diện Dark Smooth - Gọn gàng hơn */
         .smooth-panel {
             background-color: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(12px);
@@ -126,10 +126,13 @@
         }
     </style>
 </head>
-<body class="text-[11px] flex flex-col min-h-screen overflow-x-hidden relative bg-[#020617]">
+<body class="text-[11px] flex flex-col h-screen overflow-hidden relative">
 
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
+
+    <!-- Hệ thống Toast Alert thay thế cho Alert mặc định -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
     <!-- Loading Screen (Radar + 0-100% progress) -->
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-500">
@@ -165,7 +168,7 @@
                 
                 <div class="h-5 w-px bg-slate-700/50 hidden sm:block"></div>
                 <div class="flex flex-col justify-center">
-                    <h1 class="font-extrabold text-[15px] sm:text-[14px] text-white uppercase tracking-wider leading-none drop-shadow-md">TRA CỨU CƠ QUAN BHXH</h1>
+                    <h1 class="font-extrabold text-[13px] sm:text-[14px] text-white uppercase tracking-wider leading-none drop-shadow-md">TRA CỨU CƠ QUAN BHXH</h1>
                     <p class="text-[8px] text-sky-400 font-semibold uppercase tracking-widest mt-1 leading-none">Công ty CP Thương Mại Visnam</p>
                 </div>
             </div>
@@ -190,10 +193,10 @@
         </div>
     </header>
 
-    <!-- Main Layout: Cấu trúc KHÓA CHIỀU CAO - Hai cột luôn bằng nhau và liên kết chặt chẽ vào Footer -->
-    <main class="main-layout w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch mb-6">
+    <!-- Main Layout: Cấu trúc KHÓA CHIỀU CAO - Hai cột luôn bằng nhau -->
+    <main class="main-layout flex-1 w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0 mb-6">
         
-        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Tra cứu MST -> Cổng Trực Tuyến -> Khoảng cách nhỏ -> Footer) -->
+        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Tra cứu MST -> Cổng Trực Tuyến -> Bản Quyền) -->
         <aside class="sidebar-col flex flex-col gap-3">
             
             <!-- Bộ Lọc Tìm Kiếm -->
@@ -236,42 +239,48 @@
                             <i class="fas fa-search"></i> Tìm
                         </button>
                     </div>
+                    <!-- Hộp kết quả tra cứu MST -->
+                    <div id="mst-result-box" class="hidden text-[10px] p-2 bg-slate-950/70 border border-white/5 rounded-lg space-y-1.5">
+                        <p class="font-bold text-sky-400 leading-tight" id="mst-company-name"></p>
+                        <p class="text-slate-400 leading-tight" id="mst-company-address"></p>
+                        <p class="text-emerald-400 font-semibold text-[10px]" id="mst-extracted-info"></p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Cổng Trực Tuyến (Fix-shrink-0 chống kéo dãn) -->
+            <!-- Cổng Trực Tuyến -->
             <div class="smooth-panel flex-shrink-0">
                 <div class="panel-header">
                     <i class="fas fa-globe text-sky-500"></i> Cổng Trực Tuyến
                 </div>
-                <div class="p-2.5 grid grid-cols-2 gap-2 bg-slate-900/10">
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-3 rounded-lg bg-slate-900/80 border border-white/5 hover:border-sky-500/50 hover:bg-slate-800 transition-all">
+                <div class="p-2.5 grid grid-cols-2 gap-2">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-ho-gia-dinh.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-sky-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-qrcode text-sky-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Mã số<br>BHXH</span>
                     </a>
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-3 rounded-lg bg-slate-900/80 border border-white/5 hover:border-emerald-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/tra-cuu-thoi-han-su-dung-the-bhyt.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-emerald-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-id-card text-emerald-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Thẻ<br>BHYT</span>
                     </a>
-                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-3 rounded-lg bg-slate-900/80 border border-white/5 hover:border-purple-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-purple-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-building text-purple-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Đơn vị<br>tham gia</span>
                     </a>
-                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-3 rounded-lg bg-slate-900/80 border border-white/5 hover:border-orange-500/50 hover:bg-slate-800 transition-all">
+                    <a href="https://dichvucong.baohiemxahoi.gov.vn/#/index" target="_blank" rel="noreferrer" class="flex flex-col items-center justify-center text-center gap-1.5 p-2 rounded-lg bg-slate-900/80 border border-white/5 hover:border-orange-500/50 hover:bg-slate-800 transition-all">
                         <i class="fas fa-laptop-house text-orange-400 text-base"></i>
                         <span class="text-[9px] font-bold text-slate-300 leading-tight">Dịch vụ<br>công</span>
                     </a>
                 </div>
             </div>
 
-            <!-- FOOTER - Khoảng cách cố định ngay dưới cổng trực tuyến -->
-            <div class="py-2.5 text-center bg-slate-900/60 border border-white/5 rounded-lg flex-shrink-0 mt-1">
-                <p class="text-[8px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year">2026</span> VISNAM JSC.</p>
+            <!-- Footer bản quyền nhỏ gọn -->
+            <div class="mt-auto py-3 text-center flex-shrink-0">
+                <p class="text-[9px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year">2026</span> VISNAM JSC.</p>
             </div>
         </aside>
 
         <!-- CỘT PHẢI: BẢNG KẾT QUẢ ĐỒNG BỘ CHIỀU CAO VỚI CỘT TRÁI VÀ CỐ ĐỊNH CỘT DỮ LIỆU -->
-        <section class="content-col smooth-panel min-h-[500px] lg:min-h-0 relative flex flex-col">
+        <section class="content-col smooth-panel min-h-[600px] lg:min-h-0 relative flex flex-col">
             <!-- Box tuyệt đối ở Desktop giúp Bảng Không bao giờ vượt quá chiều cao cột trái -->
             <div class="flex flex-col flex-1 w-full lg:absolute lg:inset-0">
                 <div class="panel-header justify-between flex-shrink-0">
@@ -331,94 +340,8 @@
         </section>
     </main>
 
-    <!-- Modal Hỗ Trợ Tra Cứu BHXH Nổi (Hiển thị đầy đủ thông tin, không dùng nút copy, tự động hiển thị cơ quan cũ) -->
-    <div id="helper-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity animate-[fadeIn_0.2s_ease-out]">
-        <div class="smooth-panel w-full max-w-[550px] border border-sky-500/30 shadow-[0_0_40px_rgba(56,189,248,0.2)]">
-            <div class="p-4 border-b border-white/5 bg-slate-900 text-center relative">
-                <button id="btn-close-helper" class="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="w-10 h-10 bg-sky-500/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-sky-500/30">
-                    <i class="fas fa-info-circle text-sky-500 text-lg"></i>
-                </div>
-                <h3 class="text-[13px] font-bold text-white uppercase tracking-wider">THÔNG TIN TRA CỨU DOANH NGHIỆP</h3>
-                <p class="text-[9px] text-slate-400 mt-1">Hệ thống hỗ trợ tự động điền form BHXH</p>
-            </div>
-            
-            <div class="p-5 space-y-4 bg-[#020617] text-slate-300 max-h-[75vh] overflow-y-auto">
-                <!-- Doanh Nghiệp -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 border-b border-white/5 pb-3">
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Doanh nghiệp</span>
-                        <p id="helper-company-name" class="text-[11px] font-extrabold text-sky-400 mt-0.5 leading-tight"></p>
-                    </div>
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Mã số thuế</span>
-                        <p id="helper-company-taxcode" class="text-[11px] font-mono font-bold text-white mt-0.5"></p>
-                    </div>
-                </div>
-                
-                <!-- Địa chỉ -->
-                <div class="space-y-1 border-b border-white/5 pb-3">
-                    <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Địa chỉ đăng ký</span>
-                    <p id="helper-company-address" class="text-[11px] text-slate-300 leading-snug"></p>
-                </div>
-
-                <!-- Tỉnh thành & Xã phường trích xuất -->
-                <div class="grid grid-cols-2 gap-3 border-b border-white/5 pb-3">
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Tỉnh / Thành phố</span>
-                        <p id="helper-company-tinh" class="text-[11px] text-white font-semibold mt-0.5"></p>
-                    </div>
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Xã / Phường trích xuất</span>
-                        <p id="helper-company-xa" class="text-[11px] text-white font-semibold mt-0.5"></p>
-                    </div>
-                </div>
-
-                <!-- Cơ quan quản lý & Mã cơ quan -->
-                <div class="grid grid-cols-2 gap-3 border-b border-white/5 pb-3">
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Cơ quan BHXH quản lý</span>
-                        <p id="helper-company-cq" class="text-[11px] text-emerald-400 font-bold mt-0.5"></p>
-                    </div>
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Mã cơ quan BHXH</span>
-                        <p id="helper-company-macq" class="text-[11px] text-emerald-400 font-mono font-bold mt-0.5"></p>
-                    </div>
-                </div>
-
-                <!-- Mã xã & Cơ quan cũ trước sáp nhập -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pb-3 border-b border-white/5">
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Mã xã / phường</span>
-                        <p id="helper-company-maxa" class="text-[11px] text-teal-400 font-mono font-bold mt-0.5"></p>
-                    </div>
-                    <div>
-                        <span class="text-[9px] uppercase tracking-wider text-amber-500 font-bold">Cơ quan trước sáp nhập (Gợi ý)</span>
-                        <div class="flex items-center mt-0.5">
-                            <span class="bg-amber-500/10 text-amber-400 text-[8px] px-1.5 py-0.5 rounded border border-amber-500/20 font-bold mr-1.5 flex-shrink-0">Tự động phân giải</span>
-                            <p id="helper-company-pre-merger" class="text-[11px] text-amber-400 font-semibold leading-tight"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nút liên kết sang BHXH VN -->
-                <button id="btn-find-unit" class="w-full mt-2 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold py-2.5 rounded-lg text-[11px] tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(14,165,233,0.3)] hover:shadow-[0_0_20px_rgba(14,165,233,0.5)]">
-                    <i class="fas fa-external-link-alt"></i> TÌM MÃ ĐƠN VỊ BHXH (Tự động Sao chép MST)
-                </button>
-            </div>
-
-            <div class="p-3 bg-slate-900 border-t border-white/5 text-center">
-                <button id="btn-close-helper-footer" class="px-5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold text-[10px] transition-colors">
-                    ĐÓNG BẢNG TRA CỨU
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Admin Firebase Login Dark -->
-    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity">
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity">
         <div class="smooth-panel w-full max-w-[320px] border border-sky-500/30 shadow-[0_0_40px_rgba(56,189,248,0.2)]">
             <div class="p-4 border-b border-white/5 bg-slate-900 text-center relative">
                 <button id="btn-close-login" class="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors">
@@ -482,7 +405,7 @@
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cấu hình Database Firebase
+        // Cấu hình Database Firebase của bạn
         const firebaseConfig = {
           apiKey: "AIzaSyC-QUv2MgckcmqMbSTfksI0TUQCiTYW_PE",
           authDomain: "tra-cuu-co-quan-bhxh.firebaseapp.com",
@@ -521,12 +444,6 @@
         let selectedCoQuan = '';
         let searchXa = '';
 
-        // Lưu trữ tạm dữ liệu bóc tách được để hiển thị lên Helper Modal
-        let activeMst = '';
-        let activeTinh = '';
-        let activeCoQuan = '';
-        let activeWard = '';
-
         document.getElementById('year').innerText = new Date().getFullYear();
 
         // Tiến trình Loading Screen
@@ -556,6 +473,33 @@
                 screenEl.style.opacity = '0';
                 setTimeout(() => { screenEl.style.display = 'none'; }, 400);
             }, 300);
+        }
+
+        // Thiết lập hệ thống thông báo Toast thay thế Alert
+        function showToast(message, isSuccess = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-lg text-[11px] font-bold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] transition-all transform translate-y-2 opacity-0 duration-300 ${
+                isSuccess 
+                ? 'bg-emerald-950/90 text-emerald-400 border border-emerald-500/30' 
+                : 'bg-red-950/90 text-red-400 border border-red-500/30'
+            }`;
+            toast.innerHTML = `
+                <i class="${isSuccess ? 'fas fa-check-circle text-emerald-400' : 'fas fa-exclamation-triangle text-red-400'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            
+            // Remove after 3.5s
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
 
         // Lắng nghe trạng thái đăng nhập từ Firebase Auth
@@ -712,68 +656,6 @@
             return match ? match[2].trim() : '';
         }
 
-        // Hàm suy luận thông minh cơ quan quản lý cũ trước sáp nhập ngay bên trong bảng hỗ trợ nổi
-        function getPreMergerOfficeInline(tenCoQuan, tenXa, tenTinh) {
-            if (!tenCoQuan || tenCoQuan.includes("Chưa phát hiện")) return "Không phát hiện sáp nhập địa giới";
-            
-            const cleanCoQuan = tenCoQuan.replace('BHXH cơ sở', 'BHXH').trim();
-            const cleanXa = tenXa ? tenXa.replace(/(Phường|Xã|Thị trấn)\s+/i, '').trim() : '';
-            const cleanTinh = tenTinh ? tenTinh.replace(/(TP|Tỉnh)\s+/i, '').trim() : '';
-
-            // 1. Hà Nội (Sáp nhập Hà Tây năm 2008)
-            if (cleanTinh.includes("Hà Nội") || cleanCoQuan.includes("Hà Nội")) {
-                if (cleanXa.includes("Hà Đông")) return "BHXH Thành phố Hà Đông (Trước khi sáp nhập về BHXH Hà Nội)";
-                if (cleanXa.includes("Sơn Tây")) return "BHXH Thị xã Sơn Tây (Trực thuộc BHXH Tỉnh Hà Tây cũ)";
-                if (cleanXa.includes("Yên Nghĩa") || cleanXa.includes("Hà Đông")) return "BHXH Huyện Thanh Oai cũ (Được sáp nhập về quận Hà Đông quản lý)";
-                return `BHXH Huyện ${cleanXa} cũ (Thuộc BHXH Tỉnh Hà Tây trước 2008)`;
-            }
-
-            // 2. TP. Thủ Đức (Sáp nhập Quận 2, Quận 9, Thủ Đức cũ)
-            if (cleanCoQuan.includes("Thủ Đức") || cleanTinh.includes("Hồ Chí Minh")) {
-                if (cleanXa.includes("An Phú") || cleanXa.includes("Thảo Điền") || cleanXa.includes("Bình An") || cleanXa.includes("Cát Lái")) {
-                    return "BHXH Quận 2 cũ (Trước khi sáp nhập vào BHXH Thành phố Thủ Đức)";
-                }
-                if (cleanXa.includes("Hiệp Phú") || cleanXa.includes("Tăng Nhơn Phú") || cleanXa.includes("Long Thạnh Mỹ")) {
-                    return "BHXH Quận 9 cũ (Trước khi sáp nhập vào BHXH Thành phố Thủ Đức)";
-                }
-                return "BHXH Quận Thủ Đức cũ (Trước khi sáp nhập vào BHXH Thành phố Thủ Đức)";
-            }
-
-            // 3. Quảng Ninh (Sáp nhập Hoành Bồ về Hạ Long)
-            if (cleanTinh.includes("Quảng Ninh") && cleanCoQuan.includes("Hạ Long")) {
-                if (cleanXa.includes("Trới") || cleanXa.includes("Thống Nhất") || cleanXa.includes("Lê Lợi")) {
-                    return "BHXH Huyện Hoành Bồ cũ (Trước khi sáp nhập về BHXH TP Hạ Long)";
-                }
-            }
-
-            // 4. Cà Mau (Sáp nhập các chi nhánh khu vực liên huyện)
-            if (cleanTinh.includes("Cà Mau") && cleanCoQuan.includes("Cái Nước")) {
-                return "BHXH Huyện Cái Nước cũ (Trước khi phân tách chi nhánh liên huyện)";
-            }
-
-            // Các trường hợp sáp nhập chi nhánh khu vực khác
-            if (cleanCoQuan.includes("Khu vực") || cleanCoQuan.includes("Liên huyện")) {
-                return `BHXH Huyện ${cleanXa} trước sáp nhập hành chính`;
-            }
-
-            return `Không có sáp nhập địa giới (Trực thuộc trực tiếp ${cleanCoQuan})`;
-        }
-
-        // Hàm sao chép dữ liệu vào Clipboard an toàn trong Sandbox Iframe
-        function copyValue(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed'; 
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-            } catch (err) {
-                console.error('Copy failed', err);
-            }
-            document.body.removeChild(textarea);
-        }
-
         // Gắn sự kiện lắng nghe bộ lọc
         document.getElementById('select-tinh').addEventListener('change', (e) => {
             selectedTinh = e.target.value;
@@ -792,18 +674,13 @@
             applyFilters();
         });
 
-        // Xử lý khi Thay đổi MST (Tự động xóa kết quả khi rỗng và đóng Modal nếu rỗng)
+        // Xử lý khi Thay đổi MST (Tự động xóa kết quả khi rỗng)
         document.getElementById('input-mst').addEventListener('input', (e) => {
             const val = e.target.value.trim();
             if (!val) {
                 document.getElementById('mst-result-box').classList.add('hidden');
-                document.getElementById('helper-modal').classList.add('hidden');
                 document.getElementById('input-search').value = '';
                 searchXa = '';
-                activeMst = '';
-                activeTinh = '';
-                activeCoQuan = '';
-                activeWard = '';
                 applyFilters();
             }
         });
@@ -811,11 +688,14 @@
         // Tra cứu MST
         document.getElementById('btn-search-mst').addEventListener('click', async () => {
             const mstInput = document.getElementById('input-mst').value.trim();
-            const helperModal = document.getElementById('helper-modal');
+            const resultBox = document.getElementById('mst-result-box');
+            const compName = document.getElementById('mst-company-name');
+            const compAddr = document.getElementById('mst-company-address');
+            const extInfo = document.getElementById('mst-extracted-info');
             const btn = document.getElementById('btn-search-mst');
 
             if(!mstInput) {
-                alert("Vui lòng nhập Mã số thuế cần tra cứu.");
+                showToast("Vui lòng nhập Mã số thuế cần tra cứu.", false);
                 return;
             }
 
@@ -831,98 +711,54 @@
                 const resData = await response.json();
                 if (resData && resData.code === "00" && resData.data) {
                     const company = resData.data;
+                    resultBox.classList.remove('hidden');
+                    compName.innerText = `🏢 ${company.name || company.displayName}`;
+                    compAddr.innerText = `📍 Địa chỉ: ${company.address}`;
 
                     const extractedWard = extractWardOrCommune(company.address);
                     const extractedCity = extractCityOrProvince(company.address);
 
-                    activeMst = mstInput;
-                    activeWard = extractedWard;
-                    activeTinh = extractedCity;
-
-                    // Chuẩn hóa phục vụ tìm kiếm thông minh đa tỉnh (Disambiguation)
-                    const normWard = removeAccents(extractedWard.toLowerCase()).replace(/(phuong|xa|thi tran)\s+/, '').trim();
-                    const normCity = removeAccents(extractedCity.toLowerCase()).replace(/(thanh pho|tinh)\s+/, '').trim();
-
-                    // Tìm kiếm ứng cử viên xã phường trong dữ liệu hệ thống
-                    let bestMatch = null;
-                    const candidates = currentData.filter(item => {
-                        const itemWardNorm = removeAccents(item.tenXa.toLowerCase()).replace(/(phuong|xa|thi tran)\s+/, '').trim();
-                        return itemWardNorm === normWard || itemWardNorm.includes(normWard) || normWard.includes(itemWardNorm);
-                    });
-
-                    if (candidates.length > 0) {
-                        // Trùng tên xã phường? Phân giải thông minh dựa trên Tỉnh/Thành phố trích xuất được
-                        const exactProvinceMatch = candidates.find(item => {
-                            const itemCityNorm = removeAccents(item.tenTinh.toLowerCase()).replace(/(thanh pho|tinh)\s+/, '').trim();
-                            return itemCityNorm.includes(normCity) || normCity.includes(itemCityNorm);
-                        });
-                        bestMatch = exactProvinceMatch ? exactProvinceMatch : candidates[0];
-                    }
-
-                    // Tự động gán bộ lọc
-                    if (bestMatch) {
-                        selectedTinh = bestMatch.tenTinh;
-                        selectedCoQuan = bestMatch.tenCoQuan;
-                        searchXa = bestMatch.tenXa;
+                    if(extractedWard) {
+                        extInfo.innerHTML = `🔍 Tìm thấy xã/phường:<br><span class="text-sky-300 font-bold">${extractedWard}</span>`;
+                        showToast(`Tra cứu MST thành công! Đã tìm thấy: ${extractedWard}`, true);
                         
-                        document.getElementById('select-tinh').value = selectedTinh;
-                        populateCoQuanSelect();
-                        document.getElementById('select-coquan').value = selectedCoQuan;
-                        document.getElementById('input-search').value = searchXa;
-                        applyFilters();
+                        if(extractedCity) {
+                            const normalizedExtractedCity = removeAccents(extractedCity.toLowerCase());
+                            const selectTinh = document.getElementById('select-tinh');
+                            for(let option of selectTinh.options) {
+                                if(option.value && removeAccents(option.value.toLowerCase()).includes(normalizedExtractedCity)) {
+                                    selectedTinh = option.value;
+                                    selectTinh.value = option.value;
+                                    populateCoQuanSelect();
+                                    break;
+                                }
+                            }
+                        }
 
-                        activeCoQuan = bestMatch.tenCoQuan;
-                    } else {
-                        // Nếu không khớp dữ liệu, vẫn gán từ khóa tìm kiếm thô
                         document.getElementById('input-search').value = extractedWard;
                         searchXa = extractedWard;
                         applyFilters();
-                        activeCoQuan = "Chưa phát hiện trên hệ thống";
+                    } else {
+                        extInfo.innerText = "⚠️ Không thể bóc tách xã/phường từ địa chỉ này.";
+                        showToast("Tìm thấy thông tin doanh nghiệp nhưng không thể tự phân tích xã/phường.", false);
                     }
-
-                    // Điền thông tin lên Floating Helper Modal nổi
-                    document.getElementById('helper-company-name').innerText = company.name || company.displayName;
-                    document.getElementById('helper-company-taxcode').innerText = mstInput;
-                    document.getElementById('helper-company-address').innerText = company.address;
-                    document.getElementById('helper-company-tinh').innerText = extractedCity || "Chưa xác định";
-                    document.getElementById('helper-company-xa').innerText = extractedWard || "Chưa xác định";
-                    document.getElementById('helper-company-cq').innerText = activeCoQuan;
-                    document.getElementById('helper-company-macq').innerText = bestMatch ? bestMatch.maCoQuan : "Không có";
-                    document.getElementById('helper-company-maxa').innerText = bestMatch ? bestMatch.maXa : "Không có";
-                    
-                    // Hiển thị trực tiếp thông tin cơ quan trước sáp nhập trong bảng hỗ trợ nổi
-                    const preMergerCq = getPreMergerOfficeInline(activeCoQuan, extractedWard, extractedCity);
-                    document.getElementById('helper-company-pre-merger').innerText = preMergerCq;
-
-                    // Hiển thị Modal Helper nổi rực rỡ lên màn hình
-                    helperModal.classList.remove('hidden');
                 } else {
-                    alert("Không tìm thấy thông tin công ty tương ứng với mã số thuế này.");
+                    resultBox.classList.remove('hidden');
+                    compName.innerText = "❌ Không tìm thấy thông tin";
+                    compAddr.innerText = "Vui lòng kiểm tra lại mã số thuế hoặc thử lại sau.";
+                    extInfo.innerText = "";
+                    showToast("Mã số thuế không tồn tại hoặc hệ thống phản hồi lỗi.", false);
                 }
             } catch(e) {
-                alert("Lỗi kết nối đến Cổng thông tin Quốc gia. Vui lòng kiểm tra đường truyền.");
+                resultBox.classList.remove('hidden');
+                compName.innerText = "⚠️ Lỗi kết nối";
+                compAddr.innerText = "Cổng kết nối Masothue/VietQR bị gián đoạn.";
+                extInfo.innerText = "";
+                showToast("Lỗi kết nối cổng thông tin VietQR.", false);
             } finally {
                 btn.innerHTML = '<i class="fas fa-search"></i> Tìm';
                 btn.disabled = false;
             }
-        });
-
-        // Xử lý nút "Tìm mã đơn vị BHXH" trong Modal
-        document.getElementById('btn-find-unit').addEventListener('click', () => {
-            if (activeMst) {
-                // Tự động sao chép mã số thuế vào bộ nhớ đệm
-                copyValue(activeMst);
-                // Mở trang dịch vụ công của Bảo hiểm xã hội Việt Nam
-                window.open('https://baohiemxahoi.gov.vn/tracuu/pages/don-vi-tham-gia-bhxh.aspx', '_blank');
-            }
-        });
-
-        // Đóng Helper Modal
-        document.getElementById('btn-close-helper').addEventListener('click', () => {
-            document.getElementById('helper-modal').classList.add('hidden');
-        });
-        document.getElementById('btn-close-helper-footer').addEventListener('click', () => {
-            document.getElementById('helper-modal').classList.add('hidden');
         });
 
         // Xử lý Upload Excel Admin
@@ -941,7 +777,7 @@
                     const bytes = new Uint8Array(event.target.result);
                     const workbook = XLSX.read(bytes, { type: 'array' });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(bytes, { header: 1 });
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     
                     const parsedData = [];
                     for (let i = 1; i < json.length; i++) {
@@ -976,14 +812,18 @@
                                 await setDoc(docRef, { payload: JSON.stringify(chunk) });
                             }
                             showUploadMessage(`<i class="fas fa-check-circle mr-1"></i> Lưu OK.`);
+                            showToast("Đồng bộ dữ liệu Excel lên Cloud thành công!", true);
                         } else {
-                            showUploadMessage(`<i class="fas fa-exclamation-triangle mr-1"></i> Đã tải ${parsedData.length} dòng (Offline).`);
+                            showUploadMessage(`<i class="fas fa-exclamation-triangle mr-1"></i> Từ chối ghi.`, true);
+                            showToast("Lỗi phân quyền: Từ chối ghi dữ liệu.", false);
                         }
                     } else {
                         showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> File lỗi', true);
+                        showToast("Định dạng dữ liệu dòng trống hoặc không hợp lệ.", false);
                     }
                 } catch (error) {
                     showUploadMessage('<i class="fas fa-exclamation-triangle mr-1"></i> Lỗi đọc', true);
+                    showToast("Có lỗi xảy ra khi phân tích File Excel.", false);
                 } finally {
                     label.innerHTML = originalLabelText;
                     e.target.value = ''; 
@@ -1016,8 +856,10 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> XỬ LÝ...';
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeLogin();
+                showToast("Đăng nhập quản trị viên thành công!", true);
             } catch(err) {
                 errorEl.classList.remove('hidden');
+                showToast("Đăng nhập thất bại. Vui lòng thử lại.", false);
             } finally {
                 btn.innerHTML = 'ĐĂNG NHẬP';
             }
@@ -1027,7 +869,10 @@
         document.getElementById('btn-logout').addEventListener('click', async () => {
             if(isFirebaseActive) {
                 await signOut(auth);
-                try { await signInAnonymously(auth); } catch(e){}
+                try { 
+                    await signInAnonymously(auth); 
+                    showToast("Đã đăng xuất tài khoản Admin.", true);
+                } catch(e){}
             }
         });
 
@@ -1043,6 +888,16 @@
                 document.getElementById('admin-user-info').classList.remove('flex');
                 document.getElementById('upload-section').classList.add('hidden');
             }
+        }
+
+        function showUploadMessage(msg, isError = false) {
+            const msgEl = document.getElementById('upload-message');
+            msgEl.innerHTML = msg;
+            msgEl.className = `text-[9px] font-bold px-2 py-1 rounded ${isError ? 'text-red-400 bg-red-500/10' : 'text-emerald-400 bg-emerald-500/10'}`;
+            msgEl.classList.remove('hidden');
+            setTimeout(() => {
+                msgEl.classList.add('hidden');
+            }, 4000);
         }
 
         refreshUI();
