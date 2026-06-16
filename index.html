@@ -126,7 +126,7 @@
         }
     </style>
 </head>
-<body class="text-[11px] flex flex-col h-screen overflow-hidden relative">
+<body class="text-[11px] flex flex-col min-h-screen relative overflow-y-auto pb-6">
 
     <!-- Container cho hiệu ứng tuyết rơi -->
     <div id="snow-container" class="fixed inset-0 pointer-events-none z-[1] overflow-hidden"></div>
@@ -154,7 +154,7 @@
         </div>
     </div>
 
-    <!-- Header Dark Premium (Thu gọn kích thước) -->
+    <!-- Header Dark Premium -->
     <header class="bg-[#0b1120]/80 backdrop-blur-md border-b border-white/5 h-16 flex-shrink-0 relative z-40 shadow-lg">
         <div class="w-full h-full px-4 sm:px-6 flex justify-between items-center">
             
@@ -177,7 +177,7 @@
             <div class="flex items-center gap-3">
                 <!-- Nút Đăng nhập -->
                 <button id="btn-login-trigger" class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-sky-900/50 text-sky-400 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-slate-700 hover:border-sky-500/50 shadow-sm">
-                    <i class="fas fa-shield-alt"></i> <span class="hidden sm:inline">Admin</span>
+                    <i class="fas fa-shadow-alt fa-shield-alt"></i> <span class="hidden sm:inline">Admin</span>
                 </button>
                 
                 <!-- Nút Đăng xuất (Ẩn mặc định) -->
@@ -193,10 +193,10 @@
         </div>
     </header>
 
-    <!-- Main Layout: Cấu trúc KHÓA CHIỀU CAO - Hai cột luôn bằng nhau -->
-    <main class="main-layout flex-1 w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-stretch min-h-0 mb-6">
+    <!-- Main Layout: Không khóa chiều cao toàn trang, cột bảng tự co dãn có giới hạn tốt -->
+    <main class="main-layout w-full max-w-[1600px] mx-auto p-2.5 sm:p-4 gap-3 sm:gap-4 grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)] relative z-10 items-start min-h-0 mb-6">
         
-        <!-- CỘT TRÁI: SIDEBAR (Lọc Dữ Liệu -> Tra cứu MST -> Cổng Trực Tuyến -> Bản Quyền) -->
+        <!-- CỘT TRÁI: SIDEBAR -->
         <aside class="sidebar-col flex flex-col gap-3">
             
             <!-- Bộ Lọc Tìm Kiếm -->
@@ -273,16 +273,15 @@
                 </div>
             </div>
 
-            <!-- Footer bản quyền nhỏ gọn -->
-            <div class="mt-auto py-3 text-center flex-shrink-0">
+            <!-- Footer bản quyền nhỏ gọn: Không dùng mt-auto dính chân, tạo khoảng cách nhỏ tinh tế -->
+            <div class="pt-6 pb-2 text-center flex-shrink-0">
                 <p class="text-[9px] text-slate-500 font-semibold tracking-widest">&copy; <span id="year">2026</span> VISNAM JSC.</p>
             </div>
         </aside>
 
-        <!-- CỘT PHẢI: BẢNG KẾT QUẢ ĐỒNG BỘ CHIỀU CAO VỚI CỘT TRÁI VÀ CỐ ĐỊNH CỘT DỮ LIỆU -->
-        <section class="content-col smooth-panel min-h-[600px] lg:min-h-0 relative flex flex-col">
-            <!-- Box tuyệt đối ở Desktop giúp Bảng Không bao giờ vượt quá chiều cao cột trái -->
-            <div class="flex flex-col flex-1 w-full lg:absolute lg:inset-0">
+        <!-- CỘT PHẢI: BẢNG KẾT QUẢ (Có giới hạn chiều cao tinh tế và cuộn nội bộ mượt mà) -->
+        <section class="content-col smooth-panel h-[550px] lg:h-[680px] relative flex flex-col">
+            <div class="flex flex-col flex-1 w-full h-full min-h-0">
                 <div class="panel-header justify-between flex-shrink-0">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-table text-sky-500"></i> BẢNG TRÍCH XUẤT DỮ LIỆU
@@ -306,7 +305,7 @@
                 </div>
                 
                 <!-- Vùng Thanh Cuộn Bảng Tự Động - Cấu hình Layout Cố định chống lệch cột -->
-                <div class="flex-1 relative w-full min-h-0 bg-[#0b1120]/50">
+                <div class="flex-1 relative w-full min-h-0 bg-[#0b1120]/50 overflow-hidden">
                     <div class="absolute inset-0 custom-scroll overflow-auto">
                         <table class="table-fixed min-w-[880px] w-full text-left border-collapse">
                             <!-- Định cấu hình chiều rộng cố định cho từng cột -->
@@ -442,7 +441,7 @@
         let isAdmin = false;
         let selectedTinh = '';
         let selectedCoQuan = '';
-        let searchXa = '';
+        let searchXa = ''; // Khôi phục lại biến chỉ lọc xã phường
 
         document.getElementById('year').innerText = new Date().getFullYear();
 
@@ -558,7 +557,9 @@
             const tinhSet = new Set(currentData.map(item => item.tenTinh));
             select.innerHTML = '<option value="">Tỉnh/Thành phố...</option>';
             Array.from(tinhSet).sort().forEach(tinh => {
-                select.innerHTML += `<option value="${tinh}">${tinh}</option>`;
+                if (tinh) {
+                    select.innerHTML += `<option value="${tinh}">${tinh}</option>`;
+                }
             });
             select.value = selectedTinh;
         }
@@ -569,7 +570,9 @@
             const coQuanSet = new Set(dataDeLoc.map(item => item.tenCoQuan));
             select.innerHTML = '<option value="">Cơ quan BHXH...</option>';
             Array.from(coQuanSet).sort().forEach(cq => {
-                select.innerHTML += `<option value="${cq}">${cq}</option>`;
+                if (cq) {
+                    select.innerHTML += `<option value="${cq}">${cq}</option>`;
+                }
             });
             select.value = selectedCoQuan;
         }
@@ -583,17 +586,21 @@
                 .replace(/Đ/g, 'D');
         }
 
+        // Bộ lọc tìm kiếm thông minh: Chỉ lọc theo Phường/Xã và Mã Xã
         function applyFilters() {
             const search = removeAccents(searchXa.toLowerCase().trim());
             filteredData = currentData.filter(item => {
                 const matchTinh = selectedTinh === '' || item.tenTinh === selectedTinh;
                 const matchCoQuan = selectedCoQuan === '' || item.tenCoQuan === selectedCoQuan;
-                const itemXaNormalized = removeAccents(item.tenXa.toLowerCase());
-                const itemMaXa = item.maXa ? item.maXa.toLowerCase() : '';
                 
+                const itemXaNormalized = removeAccents((item.tenXa || '').toLowerCase());
+                const itemMaXa = (item.maXa || '').toLowerCase();
+                
+                // Chỉ so sánh với thông tin Phường/Xã hoặc Mã Phường/Xã
                 const matchXa = !search || 
                                 itemXaNormalized.includes(search) || 
                                 itemMaXa.includes(search);
+                                    
                 return matchTinh && matchCoQuan && matchXa;
             });
             renderTable();
@@ -649,7 +656,7 @@
             return match ? match[0].trim() : '';
         }
 
-        // Làm sạch và chỉ lấy tên riêng phường/xã (bỏ tiền tố Phường, Xã, Thị trấn, v.v.)
+        // Làm sạch và chỉ lấy tên riêng phường/xã
         function cleanWardCommuneName(name) {
             if (!name) return '';
             return name.replace(/^(phường|xã|thị\s+trấn|p\.|x\.)\s+/i, '').trim();
