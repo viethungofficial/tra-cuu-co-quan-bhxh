@@ -405,7 +405,7 @@
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cấu hình Database Firebase của bạn
+        // Cấu hình Database Firebase
         const firebaseConfig = {
           apiKey: "AIzaSyC-QUv2MgckcmqMbSTfksI0TUQCiTYW_PE",
           authDomain: "tra-cuu-co-quan-bhxh.firebaseapp.com",
@@ -649,6 +649,12 @@
             return match ? match[0].trim() : '';
         }
 
+        // Làm sạch và chỉ lấy tên riêng phường/xã (bỏ tiền tố Phường, Xã, Thị trấn, v.v.)
+        function cleanWardCommuneName(name) {
+            if (!name) return '';
+            return name.replace(/^(phường|xã|thị\s+trấn|p\.|x\.)\s+/i, '').trim();
+        }
+
         // Bóc tách Tỉnh/Thành phố từ thông tin địa chỉ MST
         function extractCityOrProvince(address) {
             if (!address) return '';
@@ -674,13 +680,22 @@
             applyFilters();
         });
 
-        // Xử lý khi Thay đổi MST (Tự động xóa kết quả khi rỗng)
+        // Xử lý khi Thay đổi/Xóa sạch MST (Tự động đưa tất cả bộ lọc về mặc định ban đầu khi rỗng)
         document.getElementById('input-mst').addEventListener('input', (e) => {
             const val = e.target.value.trim();
             if (!val) {
                 document.getElementById('mst-result-box').classList.add('hidden');
-                document.getElementById('input-search').value = '';
+                
+                // Trả toàn bộ bộ lọc và giao diện về trạng thái tổng hợp ban đầu
+                selectedTinh = '';
+                selectedCoQuan = '';
                 searchXa = '';
+                
+                document.getElementById('select-tinh').value = '';
+                document.getElementById('select-coquan').value = '';
+                document.getElementById('input-search').value = '';
+                
+                populateCoQuanSelect();
                 applyFilters();
             }
         });
@@ -735,8 +750,10 @@
                             }
                         }
 
-                        document.getElementById('input-search').value = extractedWard;
-                        searchXa = extractedWard;
+                        // Chỉ lấy tên riêng của Phường/Xã để điền vào ô tìm kiếm nhằm tăng độ chính xác của bộ lọc
+                        const cleanWard = cleanWardCommuneName(extractedWard);
+                        document.getElementById('input-search').value = cleanWard;
+                        searchXa = cleanWard;
                         applyFilters();
                     } else {
                         extInfo.innerText = "⚠️ Không thể bóc tách xã/phường từ địa chỉ này.";
